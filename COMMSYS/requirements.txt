@@ -1,1 +1,2 @@
 spidev==3.8
+spidev.RPi.GPIO
