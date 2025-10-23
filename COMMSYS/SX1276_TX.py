@@ -4,7 +4,7 @@ import time
 
 # SPI and GPIO setup
 SPI_BUS = 0
-SPI_DEVICE = 1
+SPI_DEVICE = 0
 GPIO_RESET = 17  # GPIO pin for Reset
 GPIO_CS = 8      # GPIO pin for Chip Select (connected to NSS)
 GPIO_DIO0 = 24   # GPIO pin for DIO0 (interrupt)
@@ -180,7 +180,7 @@ if __name__ == "__main__":
         radio_transmit_data(data_to_transmit)    #Use this function to transmit data in main code
 
     except Exception as e:
-        print(f"An error occurred: I can't open SPI BUS {e}")
+        print(f"An error occurred: I can't open SPI BUS: Error ---> {e}")
     finally:
         spi.close()
         GPIO.cleanup()
