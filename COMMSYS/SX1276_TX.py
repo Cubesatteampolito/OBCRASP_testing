@@ -91,7 +91,14 @@ def setup_sx1276():
     spi_write_register(REG_FDEV_MSB, fdev_msb)
     spi_write_register(REG_FDEV_LSB, fdev_lsb)
 
-def transmit_data(data):
+def radio_transmit_data(data):
+    
+    
+    
+    
+    
+    
+    
     # Go to standby mode
     # GA: di nuovo??
     spi_write_register(REG_OP_MODE, 0x02) # Standby, FSK/OOK
@@ -124,16 +131,17 @@ def transmit_data(data):
     
     print("Transmission complete.")
 
+
 # =======================================================================
-# scrivo qui come dovrebbe essere la tx chain:
-# imposto la fifotxbaseaddr dopo ogni tx (0x80 è l'inizio del buffer FIFO per la modu TX)
+# Here how the TX chain should be:
+# set the FIFO TX base address after every tx (0x80 is the start of the FIFO buffer for TX mode)
 #   spi_write_register(0x0E | 0x80, 0x80)
-# sposto il pointer all'inizio del buffer
+# move the pointer to the start of the buffer
 #   spi_write_register(0x0D | 0x80, 0x80)
-# scrivo la nuova lunghezza del payload
+# write the new payload length
 #   spi_write_register(0xA2, len(packet))
-# tx (00000011) dove 011 è TX, quindi 0x03
-#   spi_wire_register(0x81, 0x03)
+# tx (00000011) where 011 is TX, so 0x03
+#   spi_write_register(0x81, 0x03)
 
 if __name__ == "__main__":
     spi = spidev.SpiDev()
@@ -146,13 +154,13 @@ if __name__ == "__main__":
         setup_sx1276()
         
         # MESSAGE TO TRANSMIT
-        message = "Almeno COMMS funziona"
-        data_to_transmit = message.encode('utf-8')
+        message = "Almeno COMMS funziona"  #Example message, to be removed
+        data_to_transmit = message.encode('utf-8')  
         
-        transmit_data(data_to_transmit)
+        radio_transmit_data(data_to_transmit)    #Use this function to transmit data in main code
 
     except Exception as e:
-        print(f"An error occurred: {e}")
+        print(f"An error occurred: I can't open SPI BUS {e}")
     finally:
         spi.close()
         GPIO.cleanup()
