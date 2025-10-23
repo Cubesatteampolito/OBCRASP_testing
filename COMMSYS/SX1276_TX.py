@@ -3,7 +3,7 @@ import RPi.GPIO as GPIO
 import time
 
 # SPI and GPIO setup
-SPI_BUS = 1
+SPI_BUS = 0
 SPI_DEVICE = 1
 GPIO_RESET = 17  # GPIO pin for Reset
 GPIO_CS = 8      # GPIO pin for Chip Select (connected to NSS)
@@ -91,6 +91,24 @@ def setup_sx1276():
     spi_write_register(REG_FDEV_MSB, fdev_msb)
     spi_write_register(REG_FDEV_LSB, fdev_lsb)
 
+
+
+def ping_module():
+    """Read a known register to verify SPI communication with SX1276."""
+    WHO_AM_I_REG = 0x42  # RegVersion in SX1276
+    try:
+        version = spi.xfer2([WHO_AM_I_REG & 0x7F, 0x00])[1]
+        if version in (0x12, 0x11, 0x10):  # valid SX127x IDs
+            print(f"SX1276 detected. RegVersion = 0x{version:02X}")
+            return True
+        else:
+            print(f"No valid response. RegVersion = 0x{version:02X}")
+            return False
+    except Exception as e:
+        print(f"SPI communication failed: {e}")
+        return False
+
+
 def radio_transmit_data(data):
     
     
@@ -131,7 +149,6 @@ def radio_transmit_data(data):
     
     print("Transmission complete.")
 
-
 # =======================================================================
 # Here how the TX chain should be:
 # set the FIFO TX base address after every tx (0x80 is the start of the FIFO buffer for TX mode)
@@ -149,6 +166,9 @@ if __name__ == "__main__":
         # Open SPI bus
         spi.open(SPI_BUS, SPI_DEVICE)
         spi.max_speed_hz = 1000000 # 1 MHz
+
+        if not ping_module():
+            raise RuntimeError("SX1276 not responding on SPI")
 
         # Configure the SX1276 module
         setup_sx1276()
