@@ -165,6 +165,7 @@ if __name__ == "__main__":
     try:
         # Open SPI bus
         spi.open(SPI_BUS, SPI_DEVICE)
+        spi.mode = 0
         spi.max_speed_hz = 1000000 # 1 MHz
 
         if not ping_module():
