@@ -94,19 +94,12 @@ def setup_sx1276():
 
 
 def ping_module():
-    """Read a known register to verify SPI communication with SX1276."""
-    WHO_AM_I_REG = 0x42  # RegVersion in SX1276
-    try:
-        version = spi.xfer2([WHO_AM_I_REG & 0x7F, 0x00])[1]
-        if version in (0x12, 0x11, 0x10):  # valid SX127x IDs
-            print(f"SX1276 detected. RegVersion = 0x{version:02X}")
-            return True
-        else:
-            print(f"No valid response. RegVersion = 0x{version:02X}")
-            return False
-    except Exception as e:
-        print(f"SPI communication failed: {e}")
-        return False
+    REG_VERSION = 0x42
+    resp = spi.xfer2([REG_VERSION & 0x7F, 0x00])
+    version = resp[1]
+    print(f"RegVersion=0x{version:02X}")
+    return version in (0x12, 0x11, 0x10)
+
 
 
 def radio_transmit_data(data):
