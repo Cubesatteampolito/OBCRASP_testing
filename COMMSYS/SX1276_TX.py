@@ -4,7 +4,7 @@ import time
 
 # SPI and GPIO setup
 SPI_BUS = 0
-SPI_DEVICE = 0
+SPI_DEVICE = 1
 GPIO_RESET = 17  # GPIO pin for Reset
 GPIO_CS = 8      # GPIO pin for Chip Select (connected to NSS)
 GPIO_DIO0 = 24   # GPIO pin for DIO0 (interrupt)
@@ -158,11 +158,10 @@ if __name__ == "__main__":
     try:
         # Open SPI bus
         spi.open(SPI_BUS, SPI_DEVICE)
-        spi.mode = 0
         spi.max_speed_hz = 1000000 # 1 MHz
 
-        #if not ping_module():
-            #raise RuntimeError("SX1276 not responding on SPI")
+        if not ping_module():
+            raise RuntimeError("SX1276 not responding on SPI")
 
         # Configure the SX1276 module
         setup_sx1276()
