@@ -20,7 +20,7 @@ GPIO.setup(MISO, GPIO.IN, pull_up_down=GPIO.PUD_OFF)  # leave floating if no sla
 
 try:
     # Make sure idle lines are high (SPI idle = high on many setups)
-    GPIO.output(CE0, GPIO.HIGH)
+    GPIO.output(CE0, GPIO.LOW)
     GPIO.output(SCLK, GPIO.HIGH)
     GPIO.output(MOSI, GPIO.HIGH)
     print("MOSI set HIGH for 5s -> multimeter should read ~3.3V")
