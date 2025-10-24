@@ -77,20 +77,30 @@ def calculate_fdev(fdev):
 
 
 def ping_module():
-    try:
-        # Read the Version Register (0x42)
-        version = spi_read_register(REG_VERSION)
-        
-        if version == 0x12:
-            print(f"Ping successful! SX1276 Version Register (0x42) reads: {hex(version)}")
-            return True
-        else:
-            print(f"Failed to ping! Version Register (0x42) returned: {hex(version)} (Expected: 0x12)")
-            return False
-            
-    except Exception as e:
-        print(f"Ping failed due to SPI error: {e}")
-        return False
+    """Try to find which SPI bus/device combination works with SX1276"""
+    for bus in range(2):          # SPI0 and SPI1
+        for dev in range(3):      # CE0, CE1, CE2
+            try:
+                spi = spidev.SpiDev()
+                spi.open(bus, dev)
+                spi.max_speed_hz = 1000000
+                # Read version register (0x42) — should return 0x12 for SX1276
+                resp = spi.xfer2([0x42 & 0x7F, 0x00])
+                version = resp[1]
+                spi.close()
+                if version == 0x12:
+                    print(f"SX1276 detected on SPI{bus}.{dev} (version=0x{version:02X})")
+                    return (bus, dev)
+                else:
+                    print(f"SPI{bus}.{dev} active but version=0x{version:02X}")
+            except FileNotFoundError:
+                print(f"SPI{bus}.{dev} not available")
+            except OSError:
+                print(f"SPI{bus}.{dev} busy or locked")
+            except Exception as e:
+                print(f"SPI{bus}.{dev} error: {e}")
+            time.sleep(0.1)
+    return None
 
 
 
