@@ -22,7 +22,7 @@ REG_FIFO = 0x00
 REG_PAYLOAD_LENGTH = 0x31
 
 #FSK/OOK mode settings
-FREQ = 867000000  # 867 MHz
+FREQ = 868000000  # 867 MHz
 BITRATE = 9600    # 9600 bps
 FDEV = 5000       # FSK deviation in Hz (e.g., 5 kHz)
 
