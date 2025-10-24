@@ -136,7 +136,7 @@ def setup_sx1276():
     # 10. Configure PA Output Power (Switch to PA_BOOST)
     # 0x8F: PaSelect=1 (PA_BOOST pin), OutputPower=15 (0xF)
     # This gives Pout = 17 - (15 - 15) = +17dBm.
-    spi_write_register(REG_PA_CONFIG, 0x8F)  ### CORRECTED ###
+    spi_write_register(REG_PA_CONFIG, 0x7F)  ### CORRECTED ###
     
     # 11. Set PA Ramp Time
     # 0x09: FSK/OOK mode default (40 us)
