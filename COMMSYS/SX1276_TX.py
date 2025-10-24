@@ -4,7 +4,7 @@ import time
 
 # SPI and GPIO setup
 SPI_BUS = 0
-SPI_DEVICE = 0
+SPI_DEVICE = 1
 GPIO_RESET = 17  # GPIO pin for Reset
 GPIO_CS = 8      # GPIO pin for Chip Select (connected to NSS)
 GPIO_DIO0 = 24   # GPIO pin for DIO0 (interrupt)
@@ -22,7 +22,7 @@ REG_FIFO = 0x00
 REG_PAYLOAD_LENGTH = 0x31
 
 #FSK/OOK mode settings
-FREQ = 868000000  # 867 MHz
+FREQ = 868000000  # 868 MHz
 BITRATE = 9600    # 9600 bps
 FDEV = 5000       # FSK deviation in Hz (e.g., 5 kHz)
 
@@ -107,9 +107,6 @@ def radio_transmit_data(data):
     
     
     
-    
-    
-    
     # Go to standby mode
     # GA: di nuovo??
     spi_write_register(REG_OP_MODE, 0x02) # Standby, FSK/OOK
@@ -133,7 +130,7 @@ def radio_transmit_data(data):
     
     # Go to transmit mode
     # GA: finalmente sto pacchetto parte ahaha. dopo la trasmissione però bisongna riportare a 0 il Pointer.
-    spi_write_register(REG_OP_MODE, 0x03) # Transmit, FSK/OOK
+    spi_write_register(REG_OP_MODE, 0x02) # Transmit, FSK/OOK
 
     print(f"Transmitting packet with payload: '{data.decode()}'...")
 
