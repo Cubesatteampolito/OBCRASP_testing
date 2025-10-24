@@ -21,6 +21,10 @@ REG_FRF_MSB = 0x06
 REG_FRF_MID = 0x07
 REG_FRF_LSB = 0x08
 
+# Power Amplifier (PA) Configuration - NEW
+REG_PA_CONFIG = 0x09
+REG_PA_RAMP = 0x0A
+
 # FSK Packet and FIFO Configuration
 REG_FIFO_ADDR_PTR = 0x0D      # FIFO Address Pointer
 REG_FIFO_TX_BASE_ADDR = 0x0E  # FIFO Transmit Base Address (set to 0x00)
@@ -122,8 +126,17 @@ def setup_sx1276():
     
     # 8. Set FIFO TX Base Address (Start writing from the beginning of the buffer)
     spi_write_register(REG_FIFO_TX_BASE_ADDR, 0x00)
+
+    # 9. Configure PA Output Power (Crucial for FSK transmission!)
+    # 0x7A: PaSelect=0 (RFO pin), MaxPower=7 (15dBm max), OutputPower=10 (10dBm actual)
+    # Pout = Pmax - (15 - OutputPower) = 15 - (15 - 10) = 10 dBm
+    spi_write_register(REG_PA_CONFIG, 0x7A) 
     
-    # 9. Map DIO0 to TxDone Interrupt (We poll the register, but this is good practice)
+    # 10. Set PA Ramp Time
+    # 0x09: FSK/OOK mode default (3.4 ms)
+    spi_write_register(REG_PA_RAMP, 0x09) 
+    
+    # 11. Map DIO0 to TxDone Interrupt (We poll the register, but this is good practice)
     # 0x80: DIO0 mapping set to 00 (TxDone)
     spi_write_register(REG_DIO_MAPPING_1, 0x80) 
     
@@ -164,9 +177,17 @@ def radio_transmit_data(data):
     spi_write_register(REG_OP_MODE, 0x03) 
     print(f"Starting transmission...")
     
-    # 7. Wait for transmission to finish (Polling IRQ flags) - FIXED TO POLLING
+    # 7. Wait for transmission to finish (Polling IRQ flags)
     start_time = time.time()
-    timeout = 5.0 # seconds
+    # Calculate a more accurate timeout (Time on Air + buffer)
+    # Preamble: 8 symbols (8 bytes)
+    # SyncWord: 4 bytes
+    # PayloadLength: 1 byte
+    # Total bytes = 8 + 4 + 1 + payload_len
+    total_bytes = PREAMBLE_SIZE_SYMBOLS + len(SYNC_WORD) + 1 + payload_len
+    time_on_air = (total_bytes * 8) / BITRATE
+    # Set timeout to 5 times the calculated time on air, minimum 1 second.
+    timeout = max(1.0, time_on_air * 5.0) 
     tx_done = False
 
     while time.time() - start_time < timeout:
@@ -182,11 +203,14 @@ def radio_transmit_data(data):
     
     # 9. Report result and clear flags
     if tx_done:
-        # Clear the TxDone flag by reading the register again (optional, depending on chip's auto-clear setting)
+        # Clear the TxDone flag by reading the register again
         spi_read_register(REG_IRQ_FLAGS_1)
         print("Transmission complete (TxDone confirmed by IRQ flag polling).")
+        print(f"Time on Air estimate: {time_on_air:.3f} s. Polling took: {time.time() - start_time:.3f} s.")
     else:
-        print("Transmission failed: Timeout waiting for TxDone flag.")
+        # Clear any pending IRQ flags before reporting failure
+        spi_read_register(REG_IRQ_FLAGS_1) 
+        print(f"Transmission failed: Timeout waiting for TxDone flag (Timeout was {timeout:.2f} s).")
         
     # Note: No need for the try/except block around GPIO.wait_for_edge anymore
 
