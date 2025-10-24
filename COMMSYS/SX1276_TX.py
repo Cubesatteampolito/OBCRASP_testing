@@ -34,8 +34,6 @@ REG_PREAMBLE_MSB = 0x25
 REG_PREAMBLE_LSB = 0x26
 REG_SYNC_CONFIG = 0x27
 REG_SYNC_VALUE_1 = 0x28
-REG_PACKET_CONFIG_1 = 0x2D # Renamed from 0x2D, but it's 0x30 in FSK
-REG_PAYLOAD_LENGTH = 0x31 # This is RegPacketConfig2
 # --- CORRECTION: FSK Packet Registers are different from LoRa ---
 # Based on datasheet, FSK packet handling registers are:
 REG_PACKET_CONFIG_1 = 0x30    # Packet Config 1 (FSK)
@@ -138,7 +136,7 @@ def setup_sx1276():
     # 10. Configure PA Output Power (Switch to PA_BOOST)
     # 0x8F: PaSelect=1 (PA_BOOST pin), OutputPower=15 (0xF)
     # This gives Pout = 17 - (15 - 15) = +17dBm.
-    spi_write_register(REG_PA_CONFIG, 0x8F)  ### CORRECTED ###
+    spi_write_register(REG_PA_CONFIG, 0x0F)  ### CORRECTED ###
     
     # 11. Set PA Ramp Time
     # 0x09: FSK/OOK mode default (40 us)
