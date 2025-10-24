@@ -111,6 +111,7 @@ def setup_sx1276():
     
     if not ping_module():
             print("SX1276 module not responding correctly. Aborting.")
+            sys.exit(1)
             
     # 1. Enter Sleep mode and set FSK/OOK mode
     # We must be in Sleep mode to set LongRangeMode (Bit 7) to 0 (FSK).
