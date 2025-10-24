@@ -21,6 +21,7 @@ REG_FDEV_LSB = 0x05
 REG_FRF_MSB = 0x06
 REG_FRF_MID = 0x07
 REG_FRF_LSB = 0x08
+REG_VERSION = 0x42
 
 # Power Amplifier (PA) Configuration
 REG_PA_CONFIG = 0x09
@@ -74,6 +75,25 @@ def calculate_fdev(fdev):
     fdev_val = int(fdev / 61.03515625)
     return (fdev_val >> 8) & 0xFF, fdev_val & 0xFF
 
+
+def ping_module():
+    try:
+        # Read the Version Register (0x42)
+        version = spi_read_register(REG_VERSION)
+        
+        if version == 0x12:
+            print(f"Ping successful! SX1276 Version Register (0x42) reads: {hex(version)}")
+            return True
+        else:
+            print(f"❌ Ping failed! Version Register (0x42) returned: {hex(version)} (Expected: 0x12)")
+            return False
+            
+    except Exception as e:
+        print(f"❌ Ping failed due to SPI error: {e}")
+        return False
+
+
+
 def setup_sx1276():
     """Configures the SX1276 module for FSK transmission."""
     
@@ -89,6 +109,9 @@ def setup_sx1276():
     GPIO.output(GPIO_RESET, GPIO.HIGH)
     time.sleep(0.01)
     
+    if not ping_module():
+            print("SX1276 module not responding correctly. Aborting.")
+            sys.exit(1)
     # 1. Enter Sleep mode and set FSK/OOK mode
     # We must be in Sleep mode to set LongRangeMode (Bit 7) to 0 (FSK).
     spi_write_register(REG_OP_MODE, 0x00)  # 0x00 = FSK/OOK mode, Sleep
