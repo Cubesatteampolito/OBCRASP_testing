@@ -6,9 +6,9 @@ import sys
 
 # --- SPI and GPIO Setup ---
 SPI_BUS = 1
-SPI_DEVICE = 2
+SPI_DEVICE = 0
 GPIO_RESET = 17    # GPIO pin for Reset
-GPIO_CS = 16        # GPIO pin for Chip Select (connected to NSS)
+GPIO_CS = 18        # GPIO pin for Chip Select (connected to NSS)
 GPIO_DIO0 = 24     # GPIO pin for DIO0 (interrupt, mapped to TxDone)
 
 # --- Register Definitions for FSK/OOK Mode ---
@@ -90,6 +90,8 @@ def ping_module():
                 spi.close()
                 if version == 0x12:
                     print(f"SX1276 detected on SPI{bus}.{dev} (version=0x{version:02X})")
+                    SPI_BUS = bus
+                    SPI_DEVICE = dev
                     return (bus, dev)
                 else:
                     print(f"SPI{bus}.{dev} active but version=0x{version:02X}")
@@ -122,7 +124,8 @@ def setup_sx1276():
     if not ping_module():
             print("SX1276 module not responding correctly. Aborting.")
             sys.exit(1)
-            
+
+         
     # 1. Enter Sleep mode and set FSK/OOK mode
     # We must be in Sleep mode to set LongRangeMode (Bit 7) to 0 (FSK).
     spi_write_register(REG_OP_MODE, 0x00)  # 0x00 = FSK/OOK mode, Sleep
