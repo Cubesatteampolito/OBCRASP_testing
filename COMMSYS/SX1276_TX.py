@@ -85,7 +85,7 @@ def ping_module():
             print(f"Ping successful! SX1276 Version Register (0x42) reads: {hex(version)}")
             return True
         else:
-            print(f"Ping failed! Version Register (0x42) returned: {hex(version)} (Expected: 0x12)")
+            print(f" Ping failed! Version Register (0x42) returned: {hex(version)} (Expected: 0x12)")
             return False
             
     except Exception as e:
