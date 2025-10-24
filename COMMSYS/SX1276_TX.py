@@ -1,246 +1,121 @@
 import spidev
-import RPi.GPIO as GPIO
 import time
-import sys
 
-# --- SPI and GPIO Setup ---
-SPI_BUS = 0
-SPI_DEVICE = 1
-GPIO_RESET = 17    # GPIO pin for Reset
-GPIO_CS = 8        # GPIO pin for Chip Select (connected to NSS)
-GPIO_DIO0 = 24     # GPIO pin for DIO0 (interrupt, mapped to TxDone)
+# Registers
+REG_FIFO       = 0x00
+REG_OPMODE     = 0x01
+REG_FRFMSB     = 0x06
+REG_FRFMID     = 0x07
+REG_FRFLSB     = 0x08
+REG_BITRATEMSB = 0x02
+REG_BITRATELSB = 0x03
+REG_PACKETCFG1 = 0x37
+REG_PAYLOADLEN = 0x38
+REG_IRQFLAGS1  = 0x27
+REG_IRQFLAGS2  = 0x28
+REG_VERSION    = 0x42
 
-# --- Register Definitions for FSK/OOK Mode ---
-REG_FIFO = 0x00
-REG_OP_MODE = 0x01
-REG_BITRATE_MSB = 0x02
-REG_BITRATE_LSB = 0x03
-REG_FDEV_MSB = 0x04
-REG_FDEV_LSB = 0x05
-REG_FRF_MSB = 0x06
-REG_FRF_MID = 0x07
-REG_FRF_LSB = 0x08
+# Modes
+MODE_SLEEP = 0x00
+MODE_STDBY = 0x01
+MODE_TX    = 0x03
 
-# Power Amplifier (PA) Configuration - NEW
-REG_PA_CONFIG = 0x09
-REG_PA_RAMP = 0x0A
+EXPECTED_VERSION = 0x12
 
-# FSK Packet and FIFO Configuration
-REG_FIFO_ADDR_PTR = 0x0D      # FIFO Address Pointer
-REG_FIFO_TX_BASE_ADDR = 0x0E  # FIFO Transmit Base Address (set to 0x00)
-REG_PREAMBLE_MSB = 0x25       # Preamble Length MSB
-REG_PREAMBLE_LSB = 0x26       # Preamble Length LSB
-REG_SYNC_CONFIG = 0x27        # Sync Word Configuration
-REG_SYNC_VALUE_1 = 0x28       # Start of Sync Word
-REG_PACKET_CONFIG_1 = 0x2D    # Packet Format Configuration (e.g., Variable/Fixed length)
-REG_PAYLOAD_LENGTH = 0x31     # Payload Length (only used for variable/fixed modes)
-REG_IRQ_FLAGS_1 = 0x3E        # Interrupt flags
-REG_DIO_MAPPING_1 = 0x40      # DIO mapping for TxDone
+spi = spidev.SpiDev()
 
-# --- FSK/OOK Mode Settings ---
-FREQ = 868000000        # 868 MHz
-BITRATE = 9600          # 9600 bps
-FDEV = 5000             # FSK deviation in Hz (5 kHz)
-PREAMBLE_SIZE_SYMBOLS = 8 # 8 symbols (8 * 1 byte * bitrate)
-# The Access Code (Sync Word) will be handled by the chip's internal registers (up to 8 bytes)
-SYNC_WORD = [0xE1, 0x5A, 0xE8, 0x93] # 4-byte Sync Word
+def write_reg(addr, value):
+    spi.xfer2([addr | 0x80, value])
 
-def spi_write_register(reg, value):
-    """Write a single byte to an SX1276 register."""
-    # Write operation requires MSB of address to be set (reg | 0x80)
-    spi.xfer2([reg | 0x80, value])
+def read_reg(addr):
+    return spi.xfer2([addr & 0x7F, 0x00])[1]
 
-def spi_read_register(reg):
-    """Read a single byte from an SX1276 register."""
-    # Read operation requires MSB of address to be 0 (reg & 0x7F)
-    # The second byte is a dummy byte for the chip to return the value
-    resp = spi.xfer2([reg & 0x7F, 0x00])
-    return resp[1]
+def set_mode(mode):
+    opmode = read_reg(REG_OPMODE)
+    opmode = (opmode & 0xF8) | (mode & 0x07)
+    write_reg(REG_OPMODE, opmode)
 
-def calculate_frf(freq):
-    """Calculate Frequency Register Value (24-bit). Fstep = 61.03515625 Hz."""
-    frf = int(freq / 61.03515625)
-    return (frf >> 16) & 0xFF, (frf >> 8) & 0xFF, frf & 0xFF
+def clear_irqs():
+    read_reg(REG_IRQFLAGS1)
+    read_reg(REG_IRQFLAGS2)
 
-def calculate_bitrate(bitrate):
-    """Calculate Bitrate Register Value (16-bit). Rbitrate = Fosc / Bitrate."""
-    # Fosc = 32 MHz
-    br_val = int(32000000 / bitrate)
-    return (br_val >> 8) & 0xFF, br_val & 0xFF
+def check_chip():
+    version = read_reg(REG_VERSION)
+    print(f"🔎 RegVersion = 0x{version:02X}")
+    return version == EXPECTED_VERSION
 
-def calculate_fdev(fdev):
-    """Calculate Frequency Deviation Register Value (16-bit). Fdev = Fstep * RegFdev."""
-    fdev_val = int(fdev / 61.03515625)
-    return (fdev_val >> 8) & 0xFF, fdev_val & 0xFF
+def setup_fsk():
+    # Force FSK (clear LoRa mode bit)
+    opmode = read_reg(REG_OPMODE)
+    opmode &= ~(1 << 7)
+    write_reg(REG_OPMODE, opmode)
 
-def setup_sx1276():
-    """Configures the SX1276 module for FSK transmission."""
-    
-    # Setup GPIO
-    GPIO.setmode(GPIO.BCM)
-    GPIO.setup(GPIO_RESET, GPIO.OUT)
-    GPIO.setup(GPIO_CS, GPIO.OUT)
-    # The DIO0 pin setup is kept, but we rely on IRQ polling for completion.
-    GPIO.setup(GPIO_DIO0, GPIO.IN, pull_up_down=GPIO.PUD_DOWN) 
-    
-    # Reset the module
-    GPIO.output(GPIO_RESET, GPIO.LOW)
-    time.sleep(0.01)
-    GPIO.output(GPIO_RESET, GPIO.HIGH)
-    time.sleep(0.01)
-    
-    # 1. Enter Standby mode, FSK/OOK mode
-    spi_write_register(REG_OP_MODE, 0x02)  # Standby mode, FSK/OOK mode (Mode 010)
-    time.sleep(0.01)
-    
-    # 2. Set frequency
-    frf_msb, frf_mid, frf_lsb = calculate_frf(FREQ)
-    spi_write_register(REG_FRF_MSB, frf_msb)
-    spi_write_register(REG_FRF_MID, frf_mid)
-    spi_write_register(REG_FRF_LSB, frf_lsb)
-    
-    # 3. Set bitrate
-    br_msb, br_lsb = calculate_bitrate(BITRATE)
-    spi_write_register(REG_BITRATE_MSB, br_msb)
-    spi_write_register(REG_BITRATE_LSB, br_lsb)
-    
-    # 4. Set FSK deviation
-    fdev_msb, fdev_lsb = calculate_fdev(FDEV)
-    spi_write_register(REG_FDEV_MSB, fdev_msb)
-    spi_write_register(REG_FDEV_LSB, fdev_lsb)
-    
-    # 5. Set Preamble Length (in symbols)
-    # The preamble is 8 symbols long (0x0008)
-    spi_write_register(REG_PREAMBLE_MSB, 0x00)
-    spi_write_register(REG_PREAMBLE_LSB, PREAMBLE_SIZE_SYMBOLS) 
-    
-    # 6. Configure Sync Word (Access Code)
-    # 0x18: SyncOn=1, SyncSize=4 bytes, AutoRestartRx=00 (off)
-    spi_write_register(REG_SYNC_CONFIG, 0x18) 
-    for i, byte in enumerate(SYNC_WORD):
-        spi_write_register(REG_SYNC_VALUE_1 + i, byte)
-        
-    # 7. Configure Packet Format (Variable length, CRC check off for simplicity)
-    # 0x02: Variable length, DC-free encoding (none), CRC off, Address filtering off.
-    spi_write_register(REG_PACKET_CONFIG_1, 0x02)
-    
-    # 8. Set FIFO TX Base Address (Start writing from the beginning of the buffer)
-    spi_write_register(REG_FIFO_TX_BASE_ADDR, 0x00)
+    set_mode(MODE_STDBY)
 
-    # 9. Configure PA Output Power (Crucial for FSK transmission!)
-    # 0x7A: PaSelect=0 (RFO pin), MaxPower=7 (15dBm max), OutputPower=10 (10dBm actual)
-    # Pout = Pmax - (15 - OutputPower) = 15 - (15 - 10) = 10 dBm
-    spi_write_register(REG_PA_CONFIG, 0x7A) 
-    
-    # 10. Set PA Ramp Time
-    # 0x09: FSK/OOK mode default (3.4 ms)
-    spi_write_register(REG_PA_RAMP, 0x09) 
-    
-    # 11. Map DIO0 to TxDone Interrupt (We poll the register, but this is good practice)
-    # 0x80: DIO0 mapping set to 00 (TxDone)
-    spi_write_register(REG_DIO_MAPPING_1, 0x80) 
-    
-    print("SX1276 FSK setup complete.")
+    # Frequency 867 MHz
+    write_reg(REG_FRFMSB, 0xD8)
+    write_reg(REG_FRFMID, 0x01)
+    write_reg(REG_FRFLSB, 0x3F)
 
+    # Bitrate 9600 bps
+    write_reg(REG_BITRATEMSB, 0x0D)
+    write_reg(REG_BITRATELSB, 0x05)
 
-def radio_transmit_data(data):
-    """
-    Transmits data using FSK mode.
-    The chip handles Preamble and Sync Word automatically based on setup.
-    """
-    
-    payload = list(data)
-    payload_len = len(payload)
-    
-    # 1. Go to Standby mode
-    spi_write_register(REG_OP_MODE, 0x02) # Standby, FSK/OOK
-    time.sleep(0.005)
+    # Packet config: variable length, CRC on
+    write_reg(REG_PACKETCFG1, 0x80)
 
-    # 2. Clear IRQ flags (Reading RegIrqFlags1 (0x3E) clears the flags)
-    spi_read_register(REG_IRQ_FLAGS_1) 
+    # Default payload length (used in fixed mode, ignored in variable)
+    write_reg(REG_PAYLOADLEN, 0x40)
 
-    # 3. Set FIFO Pointer to TX Base Address (0x00)
-    spi_write_register(REG_FIFO_ADDR_PTR, 0x00)
-    
-    # 4. Write the payload length to the register
-    spi_write_register(REG_PAYLOAD_LENGTH, payload_len)
-    
-    # 5. Write the actual payload to the FIFO
-    print(f"Writing {payload_len} bytes to FIFO (Payload: '{data.decode()[:20]}...')")
-    
-    # Create the full command: REG_FIFO | 0x80 (write) followed by the data
-    # We write directly to the FIFO register 0x00, but the hardware auto-increments the pointer
-    spi.xfer2([REG_FIFO | 0x80] + payload)
-    
-    # 6. Go to Transmit mode
-    # 0x03: Transmit mode, FSK/OOK (Mode 011)
-    spi_write_register(REG_OP_MODE, 0x03) 
-    print(f"Starting transmission...")
-    
-    # 7. Wait for transmission to finish (Polling IRQ flags)
-    start_time = time.time()
-    # Calculate a more accurate timeout (Time on Air + buffer)
-    # Preamble: 8 symbols (8 bytes)
-    # SyncWord: 4 bytes
-    # PayloadLength: 1 byte
-    # Total bytes = 8 + 4 + 1 + payload_len
-    total_bytes = PREAMBLE_SIZE_SYMBOLS + len(SYNC_WORD) + 1 + payload_len
-    time_on_air = (total_bytes * 8) / BITRATE
-    # Set timeout to 5 times the calculated time on air, minimum 1 second.
-    timeout = max(1.0, time_on_air * 5.0) 
-    tx_done = False
+    clear_irqs()
+    print("✅ FSK setup 867MHz / 9600bps complete")
 
-    while time.time() - start_time < timeout:
-        irq_flags = spi_read_register(REG_IRQ_FLAGS_1)
-        # Check bit 3 (TxDone = 0x08) in RegIrqFlags1 (0x3E)
-        if irq_flags & 0x08: 
-            tx_done = True
-            break
-        time.sleep(0.01) # Poll every 10ms
-        
-    # 8. Return to Standby mode
-    spi_write_register(REG_OP_MODE, 0x02)
-    
-    # 9. Report result and clear flags
-    if tx_done:
-        # Clear the TxDone flag by reading the register again
-        spi_read_register(REG_IRQ_FLAGS_1)
-        print("Transmission complete (TxDone confirmed by IRQ flag polling).")
-        print(f"Time on Air estimate: {time_on_air:.3f} s. Polling took: {time.time() - start_time:.3f} s.")
+def transmit(data: str):
+    if isinstance(data, str):
+        payload = data.encode("utf-8")
     else:
-        # Clear any pending IRQ flags before reporting failure
-        spi_read_register(REG_IRQ_FLAGS_1) 
-        print(f"Transmission failed: Timeout waiting for TxDone flag (Timeout was {timeout:.2f} s).")
-        
-    # Note: No need for the try/except block around GPIO.wait_for_edge anymore
+        payload = data
 
+    length = len(payload)
+    print(f"➡️ Sending {length} bytes")
+
+    # Update payload length
+    write_reg(REG_PAYLOADLEN, length)
+
+    clear_irqs()
+
+    # Write payload to FIFO
+    for byte in payload:
+        write_reg(REG_FIFO, byte)
+
+    set_mode(MODE_TX)
+
+    timeout = time.time() + 2
+    while True:
+        irq2 = read_reg(REG_IRQFLAGS2)
+        print(f"   RegIrqFlags2 = 0x{irq2:02X}")
+        if irq2 & 0x08:
+            print("✅ Packet sent (PacketSent flag set)!")
+            break
+        if time.time() > timeout:
+            print("❌ TX timeout!")
+            break
+        time.sleep(0.05)
+
+    set_mode(MODE_STDBY)
+
+def setup_spi():
+    spi.open(0, 1)  # CE1
+    spi.max_speed_hz = 500000
+    spi.mode = 0
+    print("⚡ SPI setup complete")
 
 if __name__ == "__main__":
-    spi = spidev.SpiDev()
-    try:
-        # Open SPI bus
-        spi.open(SPI_BUS, SPI_DEVICE)
-        spi.max_speed_hz = 1000000 # 1 MHz
-        
-        # Configure the SX1276 module
-        setup_sx1276()
-        
-        # --- MESSAGE TO TRANSMIT ---
-        # The message length must be <= 255 bytes for FSK mode
-        message = "Almeno COMMS funziona - This is a test message over FSK/OOK."
-        data_to_transmit = message.encode('utf-8')
-        
-        radio_transmit_data(data_to_transmit)
-
-    except Exception as e:
-        # Check if running on a real Pi environment
-        if 'RPi' in sys.modules:
-            print(f"An error occurred: {e}")
-        else:
-            print(f"An error occurred (Did you run this on a Raspberry Pi?): {e}")
-
-    finally:
-        if 'spi' in locals() and spi:
-            spi.close()
-        GPIO.cleanup()
-        print("Cleanup complete.")
+    setup_spi()
+    if check_chip():
+        print("✅ SX1276 detected")
+        setup_fsk()
+        transmit("Hello 867MHz FSK!")
+    else:
+        print("❌ SX1276 not detected")
+    spi.close()
