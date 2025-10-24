@@ -5,10 +5,10 @@ import time
 import sys
 
 # --- SPI and GPIO Setup ---
-SPI_BUS = 0
-SPI_DEVICE = 1
+SPI_BUS = 1
+SPI_DEVICE = 2
 GPIO_RESET = 17    # GPIO pin for Reset
-GPIO_CS = 8        # GPIO pin for Chip Select (connected to NSS)
+GPIO_CS = 16        # GPIO pin for Chip Select (connected to NSS)
 GPIO_DIO0 = 24     # GPIO pin for DIO0 (interrupt, mapped to TxDone)
 
 # --- Register Definitions for FSK/OOK Mode ---
