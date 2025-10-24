@@ -6,7 +6,7 @@ import time
 SPI_BUS = 0
 SPI_DEVICE = 1
 GPIO_RESET = 17  # GPIO pin for Reset
-GPIO_CS = 8      # GPIO pin for Chip Select (connected to NSS)
+GPIO_CS = 7      # GPIO pin for Chip Select (connected to NSS)
 GPIO_DIO0 = 24   # GPIO pin for DIO0 (interrupt)
 
 # Register definitions for SX1276 (FSK/OOK mode)
