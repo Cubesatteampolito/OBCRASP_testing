@@ -127,7 +127,7 @@ def setup_sx1276():
     # 8. Configure Packet Format (Variable length)
     # This is REG_PACKET_CONFIG_1 (0x30)
     # 0x40: Variable length (Bit 7=1), DC-free (none), CRC off, Addr filtering off.
-    spi_write_register(REG_PACKET_CONFIG_1, 0x40)  ### CORRECTED ###
+    spi_write_register(REG_PACKET_CONFIG_1, 0x80)  ### CORRECTED ###
     
     # 9. Set FIFO TX Base Address
     spi_write_register(REG_FIFO_TX_BASE_ADDR, 0x00)
