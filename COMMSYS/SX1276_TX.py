@@ -76,7 +76,7 @@ def setup_sx1276():
     GPIO.setmode(GPIO.BCM)
     GPIO.setup(GPIO_RESET, GPIO.OUT)
     GPIO.setup(GPIO_CS, GPIO.OUT)
-    # Setup DIO0 as input for interrupt handling (TxDone)
+    # The DIO0 pin setup is kept, but we rely on IRQ polling for completion.
     GPIO.setup(GPIO_DIO0, GPIO.IN, pull_up_down=GPIO.PUD_DOWN) 
     
     # Reset the module
@@ -123,7 +123,7 @@ def setup_sx1276():
     # 8. Set FIFO TX Base Address (Start writing from the beginning of the buffer)
     spi_write_register(REG_FIFO_TX_BASE_ADDR, 0x00)
     
-    # 9. Map DIO0 to TxDone Interrupt
+    # 9. Map DIO0 to TxDone Interrupt (We poll the register, but this is good practice)
     # 0x80: DIO0 mapping set to 00 (TxDone)
     spi_write_register(REG_DIO_MAPPING_1, 0x80) 
     
@@ -143,8 +143,7 @@ def radio_transmit_data(data):
     spi_write_register(REG_OP_MODE, 0x02) # Standby, FSK/OOK
     time.sleep(0.005)
 
-    # 2. Reset and Clear IRQ flags (Clear TxDone flag if it was set)
-    # Reading RegIrqFlags1 (0x3E) clears the flags
+    # 2. Clear IRQ flags (Reading RegIrqFlags1 (0x3E) clears the flags)
     spi_read_register(REG_IRQ_FLAGS_1) 
 
     # 3. Set FIFO Pointer to TX Base Address (0x00)
@@ -161,32 +160,35 @@ def radio_transmit_data(data):
     spi.xfer2([REG_FIFO | 0x80] + payload)
     
     # 6. Go to Transmit mode
-    # 0x03: Transmit mode, FSK/OOK (Mode 011) - **FIXED THIS**
+    # 0x03: Transmit mode, FSK/OOK (Mode 011)
     spi_write_register(REG_OP_MODE, 0x03) 
     print(f"Starting transmission...")
     
-    # 7. Wait for transmission to finish (TxDone interrupt on DIO0)
-    # 5-second timeout for safety
-    try:
-        # Wait for a falling edge (change from HIGH to LOW) on the DIO0 pin
-        # The TxDone IRQ is a pulse. We wait for it to happen.
-        GPIO.wait_for_edge(GPIO_DIO0, GPIO.RISING, timeout=5000)
-        
-        # Read IRQ flags to confirm TxDone and clear the flag
-        irq_flags = spi_read_register(REG_IRQ_FLAGS_1)
-        if irq_flags & 0x08: # Check bit 3 (TxDone)
-            print("Transmission complete (TxDone confirmed by IRQ flag).")
-        else:
-            print("Transmission timed out or failed to set TxDone flag.")
+    # 7. Wait for transmission to finish (Polling IRQ flags) - FIXED TO POLLING
+    start_time = time.time()
+    timeout = 5.0 # seconds
+    tx_done = False
 
-    except RuntimeWarning:
-        print("Timeout waiting for TxDone interrupt.")
-        
-    except Exception as e:
-        print(f"An error occurred during wait_for_edge: {e}")
+    while time.time() - start_time < timeout:
+        irq_flags = spi_read_register(REG_IRQ_FLAGS_1)
+        # Check bit 3 (TxDone = 0x08) in RegIrqFlags1 (0x3E)
+        if irq_flags & 0x08: 
+            tx_done = True
+            break
+        time.sleep(0.01) # Poll every 10ms
         
     # 8. Return to Standby mode
     spi_write_register(REG_OP_MODE, 0x02)
+    
+    # 9. Report result and clear flags
+    if tx_done:
+        # Clear the TxDone flag by reading the register again (optional, depending on chip's auto-clear setting)
+        spi_read_register(REG_IRQ_FLAGS_1)
+        print("Transmission complete (TxDone confirmed by IRQ flag polling).")
+    else:
+        print("Transmission failed: Timeout waiting for TxDone flag.")
+        
+    # Note: No need for the try/except block around GPIO.wait_for_edge anymore
 
 
 if __name__ == "__main__":
