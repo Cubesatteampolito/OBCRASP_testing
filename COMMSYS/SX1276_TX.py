@@ -160,8 +160,8 @@ if __name__ == "__main__":
         spi.open(SPI_BUS, SPI_DEVICE)
         spi.max_speed_hz = 1000000 # 1 MHz
 
-        if not ping_module():
-            raise RuntimeError("SX1276 not responding on SPI")
+        #if not ping_module():
+            #raise RuntimeError("SX1276 not responding on SPI")
 
         # Configure the SX1276 module
         setup_sx1276()
