@@ -89,7 +89,7 @@ def ping_module():
             return False
             
     except Exception as e:
-        print(f"❌ Ping failed due to SPI error: {e}")
+        print(f"Ping failed due to SPI error: {e}")
         return False
 
 
