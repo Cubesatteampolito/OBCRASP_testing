@@ -85,11 +85,11 @@ def ping_module():
             print(f"Ping successful! SX1276 Version Register (0x42) reads: {hex(version)}")
             return True
         else:
-            print(f" Ping failed! Version Register (0x42) returned: {hex(version)} (Expected: 0x12)")
+            print(f"Failed to ping! Version Register (0x42) returned: {hex(version)} (Expected: 0x12)")
             return False
             
     except Exception as e:
-        print(f"Ping failed due to SPI error: {e}")
+        print(f"❌ Ping failed due to SPI error: {e}")
         return False
 
 
@@ -111,7 +111,7 @@ def setup_sx1276():
     
     if not ping_module():
             print("SX1276 module not responding correctly. Aborting.")
-            sys.exit(1)
+            
     # 1. Enter Sleep mode and set FSK/OOK mode
     # We must be in Sleep mode to set LongRangeMode (Bit 7) to 0 (FSK).
     spi_write_register(REG_OP_MODE, 0x00)  # 0x00 = FSK/OOK mode, Sleep
