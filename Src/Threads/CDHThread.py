@@ -15,7 +15,7 @@ availableCommands=[0,1] #command codes available from client
 clientQueueRxTimeout=0.02 #timeout for reaing from client rx queue
 #--------------------------------------
 
-def cdhThread():
+def cdhThread(stopThreads):
 	print("CDH thread started")
 	
 	sys.path.append("./messages")
@@ -25,15 +25,10 @@ def cdhThread():
 	
 	import LogThread
 	import ClientThread
-	
-	sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-	import main
-	
     
 	logQueue = LogThread.logQueue
 	clientQueueTx = ClientThread.clientQueueTx
 	clientQueueRx = ClientThread.clientQueueRx
-	stopThreads = main.stopThreads
 	uartTimeout = ClientThread.uartTimeout
 	uartRetries = ClientThread.uartRetries
 

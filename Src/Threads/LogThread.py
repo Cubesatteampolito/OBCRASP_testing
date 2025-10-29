@@ -24,13 +24,9 @@ fileBuffering=512 #file buffer size (see python file buffering modes for details
 fileRetryTime=3 #time waited after log file opening failure before retrying
 #--------------------------------------
 
-def logThread():
-	sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-	import main
+def logThread(stopThreads):
 	
 	print("Log thread started")
-	
-	stopThreads = main.stopThreads
 	
 	telegrafTryTime=0
 	socketState=0

@@ -18,12 +18,9 @@ uartTimeout=0.100 # timeout for uart transmission with ack
 uartRetries=2 #number of retries in case of failed ack (total 3 tries)
 #--------------------------------------
 
-def clientThread():
+def clientThread(stopThreads):
 	print("Client thread started")
 	
-	sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-	import main
-	stopThreads = main.stopThreads
 		
 	server=None
 	#creating socket for client

@@ -47,16 +47,13 @@ def readADC(printerr=True):
 		
 	return convres
 	
-def adcThread():
+def adcThread(stopThreads):
 	
 	import LogThread
 	
-	sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-	import main
-	
 	print("ADC thread started")
 	logQueue =LogThread.logQueue
-	stopThreads = main.stopThreads
+	
 	
 	print("Setting up ADC")
 	setupADC()
