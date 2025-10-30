@@ -76,7 +76,7 @@ def stop_handler(sig, frame): #handler function for stop signals
 #setting signal handler
 signal.signal(signal.SIGTERM, stop_handler)
 signal.signal(signal.SIGINT, stop_handler)
-
+skadladhjad=false
 cliT.join(timeout=threadTermTimeout)
 cdhT.join(timeout=threadTermTimeout)
 logT.join(timeout=threadTermTimeout)
