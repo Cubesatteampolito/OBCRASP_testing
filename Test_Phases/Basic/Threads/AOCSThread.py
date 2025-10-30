@@ -21,7 +21,7 @@ RESET = '\033[0m'
 
 def aocsThread(testStatus):
 	print("AOCS thread started")
-	
+	sys.exit()
 	sys.path.append("./messages")
 	import messages as msg
 	serial = ctypes.CDLL("./serial/serialInterface.so")

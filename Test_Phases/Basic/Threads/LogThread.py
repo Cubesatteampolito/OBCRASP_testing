@@ -27,7 +27,7 @@ fileRetryTime=3 #time waited after log file opening failure before retrying
 def logThread(stopThreads):
 	
 	print("Log thread started")
-	
+	sys.exit()
 	telegrafTryTime=0
 	socketState=0
 	

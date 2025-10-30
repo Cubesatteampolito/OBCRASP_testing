@@ -54,6 +54,7 @@ def adcThread(stopThreads):
 	print("ADC thread started")
 	logQueue =LogThread.logQueue
 	
+	sys.exit()
 	
 	print("Setting up ADC")
 	setupADC()

@@ -11,4 +11,5 @@ import os
 import signal
 
 def commsysThread(testStatus):
+    
     return
