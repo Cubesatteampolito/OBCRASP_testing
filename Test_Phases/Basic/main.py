@@ -24,7 +24,7 @@ print("Testing:")
 print("- EPS connection: test if connection with EPS works")
 print("- AOCS connection: test if connection with AOCS works both TX and RX")
 print ("- COMMSYS connection: test if connection with COMMSYS works both TX and RX{RESET}")
-prin()
+print()
 #set stdout in line buffering mode
 sys.stdout.reconfigure(line_buffering=True)
 
