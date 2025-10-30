@@ -11,5 +11,5 @@ import os
 import signal
 
 def commsysThread(testStatus):
-    
+    print("COMMSYS thread starts")
     return

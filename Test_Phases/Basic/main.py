@@ -85,6 +85,8 @@ aocsT.join(timeout=threadTermTimeout)
 logT.join(timeout=threadTermTimeout)
 cmsysT.join(timeout=threadTermTimeout)
 
+print()
+print()
 #Check test result
 if AOCStestStatus and COMMSYStestStatus and EPStestStatus and LOGtestStatus:
 	print(f"{GREEN}TEST PASSED SUCCESSFULLY")

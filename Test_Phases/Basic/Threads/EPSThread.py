@@ -51,7 +51,7 @@ def adcThread(stopThreads):
 	
 	import LogThread
 	
-	print("ADC thread started")
+	print("EPS thread started")
 	logQueue =LogThread.logQueue
 	
 	sys.exit()
