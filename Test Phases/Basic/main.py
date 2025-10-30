@@ -53,16 +53,6 @@ cdhT.start()
 logT.start()
 
 print("All threads started")
-cliT.join(timeout=threadTermTimeout)
-cdhT.join(timeout=threadTermTimeout)
-logT.join(timeout=threadTermTimeout)
-
-if teststatus:
-	print(f"{GREEN}TEST PASSED SUCCESSFULLY")
-	sys.exit()
-else:
-	print(f"{RED} TEST FAILED: Something wrong happens, check previous messages!")
-	sys.exit()
 
 def stop_handler(sig, frame): #handler function for stop signals
 	#global stopThreads
@@ -87,21 +77,13 @@ def stop_handler(sig, frame): #handler function for stop signals
 signal.signal(signal.SIGTERM, stop_handler)
 signal.signal(signal.SIGINT, stop_handler)
 
-while 1:
-	#checking if all threads are still alive
-	allAlive=True
-	if not adcT.is_alive():
-		allAlive=False
-	if not cliT.is_alive():
-		allAlive=False
-	if not cdhT.is_alive():
-		allAlive=False
-	if not logT.is_alive():
-		allAlive=False
-		
-	if not allAlive:
-		print("A thread unexpectedly closed, terminating execution")
-		os.kill(os.getpid(),signal.SIGTERM)
-	
-	time.sleep(1)
-			
+cliT.join(timeout=threadTermTimeout)
+cdhT.join(timeout=threadTermTimeout)
+logT.join(timeout=threadTermTimeout)
+
+if teststatus:
+	print(f"{GREEN}TEST PASSED SUCCESSFULLY")
+	sys.exit()
+else:
+	print(f"{RED} TEST FAILED: Something wrong happens, check previous messages!")
+	sys.exit()
