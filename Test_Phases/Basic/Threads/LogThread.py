@@ -10,6 +10,14 @@ import ctypes
 import os
 import signal
 
+RED = '\033[31m'
+GREEN = '\033[32m'
+YELLOW = '\033[33m'
+BLUE = '\033[34m'
+WHITE = '\033[37m'
+LIGHT_BLUE = '\033[36m'
+RESET = '\033[0m'
+
 #Logging thread -----------------------
 telegrafSockPath="/tmp/telegraf.sock" #telegraf socket path
 logQueue=queue.Queue() #queue to send strings for telegraf/log file
@@ -24,47 +32,38 @@ fileBuffering=512 #file buffer size (see python file buffering modes for details
 fileRetryTime=3 #time waited after log file opening failure before retrying
 #--------------------------------------
 
-def logThread(stopThreads):
+def logThread(testStatus):
 	
 	print("Log thread started")
 	sys.exit()
-	telegrafTryTime=0
-	socketState=0
 	
-	fileTryTime=0
-	fileState=0
 	
 	telegrafSock=None
 	logFile=None
-	
-	while 1: #thread loop
-		if stopThreads.is_set(): #need to close thread
-			break
-		
-		#checking if telegraf is not connected
-		if socketState==0 and (time.time()-telegrafTryTime)>telegrafRetryTime:
-			telegrafTryTime=time.time()
-			telegrafSock=socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
-			try:
+
+	#trying to open telegraf socket
+	telegrafSock=socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
+	try:
 				telegrafSock.connect(telegrafSockPath)
-			except:
-				print("ERROR: Failed to connect to telegraf ({0}), retrying in {1} seconds".format(telegrafSockPath,telegrafRetryTime))
-			else:
-				socketState=1
-				print("telegraf socket ({0}) connected".format(telegrafSockPath))	
-		
-		#checking if log file is not opened
-		if enableFileLog and fileState==0 and (time.time()-fileTryTime)>fileRetryTime:
-			fileTryTime=time.time()
-			try:
+	except:
+			print(f"{RED}ERROR: Failed to connect to telegraf ({0}), retrying in {1} seconds".format(telegrafSockPath,telegrafRetryTime))
+			testStatus=False
+	else:
+		print("telegraf socket ({0}) connected".format(telegrafSockPath))
+
+	#trying to open log file
+	try:
 				logFile=open(logFilePath,"w",fileBuffering) #opening log file
-			except:
-				print("ERROR: Failed to open log file ({0}), retrying in {1} seconds".format(logFilePath,fileRetryTime))
-			else:
-				fileState=1
-				print("log file ({0}) opened".format(logFilePath))
-				
-		
+	except:
+		print(f"{RED}ERROR: Failed to open log file ({0}), retrying in {1} seconds".format(logFilePath,fileRetryTime))
+		testStatus=False
+
+	else:
+		print("log file ({0}) opened".format(logFilePath))
+
+	getCounter=0
+	
+	while getCounter<3: #thread loop
 		#checking if there's some data to be logged
 		try:
 			log=logQueue.get(timeout=logQueueTimeout)
@@ -74,21 +73,26 @@ def logThread(stopThreads):
 			#if some data has been received, encode it
 			logbyte=log.encode("utf-8")
 			#send it to telegraf
-			if socketState==1:
-				try:
-					telegrafSock.send(logbyte)
-				except:
-					print("ERROR: Failed to send data to telegraf")
-					telegrafSock.close()
-					socketState=0
-					
-			if enableFileLog and fileState==1:
+			try:
+				telegrafSock.send(logbyte)
+			except:
+				print(f"{RED}ERROR: Failed to send data to telegraf")
+				testStatus=False
+				telegrafSock.close()
+				socketState=0
+				sys.exit()
+			else:
+				getCounter+=1
+
+			if enableFileLog:
 				try:
 					logFile.write(log)
 				except:
 					print("ERROR: Failed to write data on file")
 					logFile.close()
-					fileState=0
+					sys.exit()
+				else: 
+					getCounter+=1
 				
 	print("Closing telegraf socket")
 	telegrafSock.close()
