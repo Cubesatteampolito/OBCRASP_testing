@@ -17,14 +17,14 @@ BLUE = '\033[34m'
 WHITE = '\033[37m'
 LIGHT_BLUE = '\033[36m'
 RESET = '\033[0m'
-print("-"*25)
+print(f"{LIGHT_BLUE}-"*25)
 print(f"{LIGHT_BLUE}| TEST PHASE --> BASIC  |")
 print("-"*25)
 print("Testing:")
 print("- EPS connection: test if connection with EPS works")
 print("- AOCS connection: test if connection with AOCS works both TX and RX")
 print ("- COMMSYS connection: test if connection with COMMSYS works both TX and RX{RESET}")
-
+prin()
 #set stdout in line buffering mode
 sys.stdout.reconfigure(line_buffering=True)
 
