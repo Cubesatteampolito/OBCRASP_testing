@@ -45,7 +45,7 @@ print(f"{WHITE}Starting threads")
 
 epsT=threading.Thread(target=Threads.EPSThread.adcThread,args=(EPStestStatus,), daemon=True)
 aocsT=threading.Thread(target=Threads.AOCSThread.aocsThread,args=(AOCStestStatus,), daemon=True)	
-logT=threading.Thread(target=Threads.LogThread.logThread,args = (LOGtestStatus), daemon=True)
+logT=threading.Thread(target=Threads.LogThread.logThread,args = (LOGtestStatus,), daemon=True)
 cmsysT=threading.Thread(target=Threads.COMMSYSThread.commsysThread, args=(COMMSYStestStatus,),daemon=True)
 
 epsT.start()
