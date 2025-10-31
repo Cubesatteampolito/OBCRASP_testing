@@ -27,6 +27,7 @@ def clientThread(stopThreads):
 		if os.path.exists(cdhSockPath):
 			os.remove(cdhSockPath)
 	
+		print("QUA ARRIVO")
 		server=socket.socket(socket.AF_UNIX,socket.SOCK_DGRAM)
 		print("server creato")
 		server.bind(cdhSockPath)
