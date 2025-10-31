@@ -76,10 +76,10 @@ def stop_handler(sig, frame): #handler function for stop signals
 	print("Received termination signal")
 	
 	#waiting for all threads to join
-	#adcT.join(timeout=threadTermTimeout)
-	cliT.join(timeout=threadTermTimeout)
-	cdhT.join(timeout=threadTermTimeout)
-	logT.join(timeout=threadTermTimeout)
+	epsT.join(timeout=threadTermTimeout)
+	# cliT.join(timeout=threadTermTimeout)
+	# cdhT.join(timeout=threadTermTimeout)
+	# logT.join(timeout=threadTermTimeout)
 	
 	print("All threads terminated or timed out previously, test produces no result")
 	sys.exit()
