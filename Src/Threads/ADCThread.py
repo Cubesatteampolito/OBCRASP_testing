@@ -79,7 +79,7 @@ def adcThread(stopThreads):
 		#writing data on telegraf/file
 		strFormat="housekeepingOBC,source={0} VB={1},IB={2},V5={3},I5={4} {5}\n"
 		finalString=strFormat.format("OBC",vb,ib,v5,i5,time.time_ns())
-		print(finalString,sep="")
+		#print(finalString,sep="")
 		#sending data to logThread
 		logQueue.put(finalString)
 
