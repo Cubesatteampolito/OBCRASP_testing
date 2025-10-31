@@ -25,29 +25,33 @@ import Threads.LogThread
 
 #running all threads
 print("Starting threads")
-adcT=threading.Thread(target=Threads.ADCThread.adcThread,args=(stopThreads,), daemon=True)
+#adcT=threading.Thread(target=Threads.ADCThread.adcThread,args=(stopThreads,), daemon=True)
 cliT=threading.Thread(target=Threads.ClientThread.clientThread,args= (stopThreads,), daemon=True)	
-cdhT=threading.Thread(target=Threads.CDHThread.cdhThread,args=(stopThreads,), daemon=True)	
-logT=threading.Thread(target=Threads.LogThread.logThread,args = (stopThreads,), daemon=True)
+#cdhT=threading.Thread(target=Threads.CDHThread.cdhThread,args=(stopThreads,), daemon=True)	
+#logT=threading.Thread(target=Threads.LogThread.logThread,args = (stopThreads,), daemon=True)
 	
-adcT.start()
+#adcT.start()
 cliT.start()
-cdhT.start()
-logT.start()
+#cdhT.start()
+#logT.start()
 
 print("All threads started")
 
 def stop_handler(sig, frame): #handler function for stop signals
+	global stopThreads
+	
+	global cliT
+	
+	global threadTermTimeout
 
 	stopThreads.set() #stopping all threads
 	
 	print("Received termination signal")
 	
 	#waiting for all threads to join
-	adcT.join(timeout=threadTermTimeout)
+	
 	cliT.join(timeout=threadTermTimeout)
-	cdhT.join(timeout=threadTermTimeout)
-	logT.join(timeout=threadTermTimeout)
+	
 	
 	print("All threads terminated or timed out, BYE!")
 	sys.exit()
