@@ -84,6 +84,33 @@ def readADC(printerr=True):
 		
 	return convres
 	
+#setting up the ADC
+def setupADC(printerr=True):
+	try:
+		#turning on internal reference
+		bus.write_byte(address, command)
+	except:
+		if printerr:
+			print("ERROR: Failed to set up ADC")
+		
+	#waiting to stabilize Vref
+	time.sleep(0.005)
+
+#reading the ADC
+def readADC(printerr=True):
+	#requesting conversions
+	convres=[0 for _ in range(8)]
+	try:
+		for ch in range(8):
+			convOut=bus.read_i2c_block_data(address,command+0x10*ch,2)
+			convres[ch]=convOut[0]*256+convOut[1]
+	except:
+		if printerr:
+			print("ERROR: Failed to read the ADC, trying to set it up again")
+		setupADC(printerr)
+		
+	return convres
+
 def adcThread():
 	print("ADC thread started")
 	
@@ -107,16 +134,18 @@ def adcThread():
 		ADCdata=readADC(False)
 		#measurements reconstruction
 		for ch in range(8):
-			ADCdata[ch]=ADCdata[ch]*2.5/4095 #reconstructing measured voltage
+			ADCdata[ch]=ADCdata[ch]*2.5/4096 #reconstructing measured voltage
+		
 		#reconstructing measurements
-			ADCdata[0]=ADCdata[0]*2 	#V5
-			ADCdata[1]=ADCdata[1]*3.326667 	#I5
-			ADCdata[2]=ADCdata[2]*5.255319 	#VB
-			ADCdata[3]=ADCdata[3]*3.326667 	#IB
+		
+		v5=ADCdata[0]*2 		#V5
+		vb=ADCdata[1]*5.255319	#VB
+		i5=ADCdata[4]*5.255319 	#I5 
+		ib=ADCdata[5]/0.30060	#IB 
 			
 		#writing data on telegraf/file
 		strFormat="housekeepingOBC,source={0} VB={1},IB={2},V5={3},I5={4} {5}\n"
-		finalString=strFormat.format("OBC",ADCdata[2],ADCdata[3],ADCdata[0],ADCdata[1],time.time_ns())
+		finalString=strFormat.format("OBC",vb,ib,v5,i5,time.time_ns())
 		#print(finalString,sep="")
 		#sending data to logThread
 		logQueue.put(finalString)
