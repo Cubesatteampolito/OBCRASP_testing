@@ -28,7 +28,9 @@ def clientThread(stopThreads):
 			os.remove(cdhSockPath)
 	
 		server=socket.socket(socket.AF_UNIX,socket.SOCK_DGRAM)
+		print("server creato")
 		server.bind(cdhSockPath)
+		print("server collegato")
 		server.setblocking(False)
 	except:
 		print("ERROR: Failed to create client socket {0}".format(cdhSockPath))
