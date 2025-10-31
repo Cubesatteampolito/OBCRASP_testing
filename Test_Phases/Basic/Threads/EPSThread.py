@@ -52,7 +52,7 @@ def adcThread(stopThreads):
 	import LogThread
 	
 	print("EPS thread started")
-	logQueue =LogThread.logQueue
+	#logQueue =LogThread.logQueue
 	
 	
 	print("Setting up ADC")
