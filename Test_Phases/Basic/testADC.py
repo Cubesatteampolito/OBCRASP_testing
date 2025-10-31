@@ -25,15 +25,16 @@ for ch in range(8):
 #printing conversion results from the list of read messages
 print("Conversion results:")
 for ch in range(len(convres)):
-	convres[ch]=convres[ch][0]*256+convres[ch][1]
-	convres[ch] = convres[ch]*2.5/4095
+	if(ch!=2):
+		convres[ch]=convres[ch][0]*256+convres[ch][1]
+		convres[ch] = convres[ch]*2.5/4095
 	
 
 convres[0]= convres[0] * 2 #V5
 print("V5 VALUE: {0}".format(convres[0]))
 convres[1]= convres[1]*5.255319  #vb
 print("vb VALUE: {0}".format(convres[1]))
-convres[2] = convres[2]/0.30060    #
+convres[2] = convres[2]    #unknown
 print("unknown VALUE: {0}".format(convres[2]))
 convres[3] = convres[3]/0.30060  #IB
 print("IB VALUE: {0}".format(convres[3]))
