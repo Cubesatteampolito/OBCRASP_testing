@@ -58,8 +58,8 @@ def adcThread(stopThreads):
 	print("Setting up ADC")
 	setupADC()
 	while 1: #thread loop
-		if stopThreads.is_set(): #need to close thread
-			break
+		#if stopThreads.is_set(): #need to close thread
+			#break
 		#lightweight method to get periodic task without strict control on period overflow or system time changes
 		time.sleep(ADCperiod-time.time()%ADCperiod)		
 		#getting ADC data
