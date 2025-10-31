@@ -9,6 +9,8 @@ import socket
 import ctypes
 import os
 import signal
+import stat
+
 #Client thread ------------------------
 cdhSockPath="/tmp/CDH.sock"
 clientQueueTx=queue.Queue() #queue to send data to client
@@ -25,6 +27,7 @@ def clientThread(stopThreads):
 	print("Creating client socket")
 	try:
 		if os.path.exists(cdhSockPath):
+			os.chmod(cdhSockPath, stat.S_IWUSR | stat.S_IRUSR)
 			os.remove(cdhSockPath)
 	
 		print("QUA ARRIVO")
