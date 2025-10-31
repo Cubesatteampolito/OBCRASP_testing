@@ -25,5 +25,5 @@ for ch in range(8):
 #printing conversion results from the list of read messages
 print("Conversion results:")
 for ch in range(len(convres)):
-	print("Channel {0}: {1}".format(ch,int(convres[ch][0]*256+convres[ch][1])))
+	print("Channel {0}: {1}".format(ch,int(convres[ch][0]*256+convres[ch][1])*2.5/4095))
 
