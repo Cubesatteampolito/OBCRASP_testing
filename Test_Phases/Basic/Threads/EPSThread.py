@@ -39,7 +39,9 @@ def readADC(printerr=True):
 	try:
 		for ch in range(8):
 			convOut=bus.read_i2c_block_data(address,command+0x10*ch,2)
+			print("CONVOUT "+ convOut)
 			convres[ch]=convOut[0]*256+convOut[1]
+			print("convers: " +convres[0]+ " "+ convres[1])
 	except:
 		if printerr:
 			print("ERROR: Failed to read the ADC, trying to set it up again")
