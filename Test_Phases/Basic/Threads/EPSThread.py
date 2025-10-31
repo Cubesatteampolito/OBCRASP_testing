@@ -70,7 +70,7 @@ def adcThread(stopThreads):
 		for ch in range(8):
 			print(ADCdata[ch])
 			print()
-			ADCdata[ch]=ADCdata[ch]*2.5/4095 #reconstructing measured voltage
+			ADCdata[ch]=ADCdata[ch]*2.5/4096 #reconstructing measured voltage
 		
 		#reconstructing measurements
 		
