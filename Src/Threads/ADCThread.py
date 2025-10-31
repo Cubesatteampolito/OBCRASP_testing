@@ -51,7 +51,7 @@ def adcThread(stopThreads):
 	import LogThread
 	
 	print("EPS thread started")
-	logQueue =LogThread.logQueue
+	
 	
 	
 	print("Setting up ADC")
@@ -81,5 +81,5 @@ def adcThread(stopThreads):
 		finalString=strFormat.format("OBC",vb,ib,v5,i5,time.time_ns())
 		#print(finalString,sep="")
 		#sending data to logThread
-		logQueue.put(finalString)
+		LogThread.logQueue.put(finalString)
 

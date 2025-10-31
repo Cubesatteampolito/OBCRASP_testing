@@ -68,6 +68,7 @@ def logThread(stopThreads):
 		#checking if there's some data to be logged
 		try:
 			log=logQueue.get(timeout=logQueueTimeout)
+			print(log)
 		except:
 			pass
 		else:
