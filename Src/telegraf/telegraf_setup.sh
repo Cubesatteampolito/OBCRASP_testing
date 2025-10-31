@@ -3,7 +3,6 @@
 #CHECK IF SCRIPT IS RUN WITH SUDO
 if [ "$EUID" -eq 0 ]
   then echo "Script should NOT be called as sudo"
-  exit
 fi
 
 #ADDING TELEGRAF REPOSITORY (from https://www.influxdata.com/downloads/)
