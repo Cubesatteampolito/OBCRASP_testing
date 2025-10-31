@@ -63,14 +63,14 @@ signal.signal(signal.SIGINT, stop_handler)
 while 1:
 	#checking if all threads are still alive
 	allAlive=True
-	if not adcT.is_alive():
-		allAlive=False
+	#if #not adcT.is_alive():
+		#allAlive=False
 	if not cliT.is_alive():
 		allAlive=False
-	if not cdhT.is_alive():
-		allAlive=False
-	if not logT.is_alive():
-		allAlive=False
+	#if not cdhT.is_alive():
+		#allAlive=False
+	#if not logT.is_alive():
+		#allAlive=False
 		
 	if not allAlive:
 		print("A thread unexpectedly closed, terminating execution")

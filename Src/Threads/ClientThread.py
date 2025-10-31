@@ -29,8 +29,8 @@ def clientThread(stopThreads):
 		if os.path.exists(cdhSockPath):
 			print("provo a cambiare permessi")
 			os.chmod(cdhSockPath, stat.S_IWUSR | stat.S_IRUSR)
-			print(os.listdir(cdhSockPath))
-			
+			print("cambiati i permessi")
+
 			os.remove(cdhSockPath)
 	
 		print("QUA ARRIVO")
