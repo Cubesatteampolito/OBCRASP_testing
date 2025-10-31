@@ -1,4 +1,3 @@
-
 #!/bin/python3
 
 import smbus2
@@ -16,7 +15,7 @@ address=0x48
 command=0x8C
 #creating SMBus instance on I2C bus 1
 bus=smbus2.SMBus(1)
-ADCperiod=5 #sampling period in seconds
+ADCperiod=1 #sampling period in seconds
 #--------------------------------------
 
 
@@ -51,7 +50,7 @@ def adcThread(stopThreads):
 	
 	import LogThread
 	
-	print("ADC thread started")
+	print("EPS thread started")
 	logQueue =LogThread.logQueue
 	
 	
@@ -68,16 +67,19 @@ def adcThread(stopThreads):
 		ADCdata=readADC(False)
 		#measurements reconstruction
 		for ch in range(8):
-			ADCdata[ch]=ADCdata[ch]*2.5/4095 #reconstructing measured voltage
+			ADCdata[ch]=ADCdata[ch]*2.5/4096 #reconstructing measured voltage
+		
 		#reconstructing measurements
-			ADCdata[0]=ADCdata[0]*2 	#V5
-			ADCdata[1]=ADCdata[1]*3.326667 	#I5
-			ADCdata[2]=ADCdata[2]*5.255319 	#VB
-			ADCdata[3]=ADCdata[3]*3.326667 	#IB
+		
+		v5=ADCdata[0]*2 		#V5
+		vb=ADCdata[1]*5.255319	#VB
+		i5=ADCdata[4]*5.255319 	#I5 
+		ib=ADCdata[5]/0.30060	#IB 
 			
 		#writing data on telegraf/file
 		strFormat="housekeepingOBC,source={0} VB={1},IB={2},V5={3},I5={4} {5}\n"
-		finalString=strFormat.format("OBC",ADCdata[2],ADCdata[3],ADCdata[0],ADCdata[1],time.time_ns())
-		#print(finalString,sep="")
+		finalString=strFormat.format("OBC",vb,ib,v5,i5,time.time_ns())
+		print(finalString,sep="")
 		#sending data to logThread
 		logQueue.put(finalString)
+

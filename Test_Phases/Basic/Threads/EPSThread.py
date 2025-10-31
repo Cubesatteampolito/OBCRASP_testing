@@ -16,7 +16,7 @@ address=0x48
 command=0x8C
 #creating SMBus instance on I2C bus 1
 bus=smbus2.SMBus(1)
-ADCperiod=5 #sampling period in seconds
+ADCperiod=1 #sampling period in seconds
 #--------------------------------------
 
 
@@ -39,9 +39,7 @@ def readADC(printerr=True):
 	try:
 		for ch in range(8):
 			convOut=bus.read_i2c_block_data(address,command+0x10*ch,2)
-			print("CONVOUT "+ convOut)
 			convres[ch]=convOut[0]*256+convOut[1]
-			print("convers: " +convres[0]+ " "+ convres[1])
 	except:
 		if printerr:
 			print("ERROR: Failed to read the ADC, trying to set it up again")
@@ -70,21 +68,18 @@ def adcThread(stopThreads):
 		ADCdata=readADC(False)
 		#measurements reconstruction
 		for ch in range(8):
-			print("RAW DATA {0} : {1}".format(ch,ADCdata[ch]))
-			print()
 			ADCdata[ch]=ADCdata[ch]*2.5/4096 #reconstructing measured voltage
 		
 		#reconstructing measurements
 		
-		ADCdata[0]=ADCdata[0]*2 		#V5
-		ADCdata[1]=ADCdata[1] /0.30060		#I5
-		
-		ADCdata[2]=ADCdata[2]*5.255319 	#VB battery voltage
-		ADCdata[3]=ADCdata[3]/0.30060	#IB battery current
+		v5=ADCdata[0]*2 		#V5
+		vb=ADCdata[1]*5.255319	#VB
+		i5=ADCdata[4]*5.255319 	#I5 
+		ib=ADCdata[5]/0.30060	#IB 
 			
 		#writing data on telegraf/file
-		strFormat="housekeepingOBC,source={0} VB={1},IB={2},V5={3},I5RAW={4} {5}\n"
-		finalString=strFormat.format("OBC",ADCdata[0],ADCdata[1],ADCdata[2],ADCdata[3],time.time_ns())
+		strFormat="housekeepingOBC,source={0} VB={1},IB={2},V5={3},I5={4} {5}\n"
+		finalString=strFormat.format("OBC",vb,ib,v5,i5,time.time_ns())
 		print(finalString,sep="")
 		#sending data to logThread
 		#logQueue.put(finalString)

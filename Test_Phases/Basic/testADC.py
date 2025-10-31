@@ -8,6 +8,17 @@ command=0x8C
 
 print("ADC tester (ADS7828E)")
 
+'''
+CONVRES[0]: CH0 --> V5
+CONVRES[1]: CH2 --> VB
+CONVRES[2]: CH4 --> T0 --> PC104 resistenza incorporata
+CONVRES[3]: CH6 --> PC104
+CONVRES[4]: CH1 --> I5
+CONVRES[5]: CH3 --> IB
+CONVRES[6]: CH5 --> PC104
+CONVRES[7]: CH7 --> PC104
+'''
+
 #creating SMBus instance on I2C bus 1
 bus=smbus2.SMBus(1)
 
@@ -43,14 +54,3 @@ print("PC104 VALUE: {0}".format(convres[2])) #unknown
 print("PC104 VALUE: {0}".format(convres[3])) #unknown
 print("PC104 VALUE: {0}".format(convres[2])) #unknown
 print("PC104 VALUE: {0}".format(convres[3])) #unknown
-
-'''
-ELEMENTO 0: CH0 --> V5
-ELEMENTO 1: CH2 --> VB
-ELEMENTO 2: CH4 --> T0 --> PC104 resistenza incorporata
-ELEMENTO 3: CH6 --> PC104
-ELEMENTO 4: CH1 --> I5
-ELEMENTO 5: CH3 --> IB
-ELEMENTO 6: CH5 --> PC104
-ELEMENTO 7: CH7 --> PC104
-'''
