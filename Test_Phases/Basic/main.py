@@ -90,6 +90,25 @@ signal.signal(signal.SIGINT, stop_handler)
 print()
 print()
 #Check test result
+
+while 1:
+	#checking if all threads are still alive
+	allAlive=True
+	if not epsT.is_alive():
+		allAlive=False
+	# if not cliT.is_alive():
+	# 	allAlive=False
+	# if not cdhT.is_alive():
+	# 	allAlive=False
+	# if not logT.is_alive():
+	# 	allAlive=False
+		
+	if not allAlive:
+		print("A thread unexpectedly closed, terminating execution")
+		os.kill(os.getpid(),signal.SIGTERM)
+	
+	time.sleep(1)
+
 if AOCStestStatus and COMMSYStestStatus and EPStestStatus and LOGtestStatus:
 	print(f"{GREEN}TEST PASSED SUCCESSFULLY")
 	sys.exit()
