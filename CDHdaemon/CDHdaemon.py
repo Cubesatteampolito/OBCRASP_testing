@@ -400,6 +400,7 @@ def cdhThread():
 						print("WARNING: {0} message from ADCS not handled".format(msg.msgDict[code].__name__))
 			else:
 				print("WARNING: Received unknown message from ADCS (code {0} length {1})".format(code, l))
+				print("Packet {0} {1} {2}".format(msg.msgDict[code].__code__,msg.msgDict[code].__name__,msg.msgDict[code].__str__))
 	
 	print("Closing UART")	
 	serial.deinitUART()
