@@ -27,7 +27,10 @@ def clientThread(stopThreads):
 	print("Creating client socket")
 	try:
 		if os.path.exists(cdhSockPath):
+			print("provo a cambiare permessi")
 			os.chmod(cdhSockPath, stat.S_IWUSR | stat.S_IRUSR)
+			print(os.listdir(cdhSockPath))
+			
 			os.remove(cdhSockPath)
 	
 		print("QUA ARRIVO")
