@@ -54,7 +54,6 @@ def adcThread(stopThreads):
 	print("EPS thread started")
 	logQueue =LogThread.logQueue
 	
-	sys.exit()
 	
 	print("Setting up ADC")
 	setupADC()
@@ -79,6 +78,6 @@ def adcThread(stopThreads):
 		#writing data on telegraf/file
 		strFormat="housekeepingOBC,source={0} VB={1},IB={2},V5={3},I5={4} {5}\n"
 		finalString=strFormat.format("OBC",ADCdata[2],ADCdata[3],ADCdata[0],ADCdata[1],time.time_ns())
-		#print(finalString,sep="")
+		print(finalString,sep="")
 		#sending data to logThread
-		logQueue.put(finalString)
+		#logQueue.put(finalString)
