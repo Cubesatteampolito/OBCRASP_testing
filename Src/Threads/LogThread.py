@@ -15,7 +15,7 @@ telegrafSockPath="/tmp/telegraf.sock" #telegraf socket path
 logQueue=queue.Queue() #queue to send strings for telegraf/log file
 logQueueTimeout=0.05 #timeout for log queue read (to reduce CPU starving)
 telegrafRetryTime=3 #time waited after telegraf connection failure before retrying
-enableFileLog=False #file logging enabled/disabled
+enableFileLog=True #file logging enabled/disabled
 logFilePath="telegrafLog.txt" #log file path
 fileBuffering=512 #file buffer size (see python file buffering modes for details)
 		#file buffer has been set to a big value because a lot of I/O from 
