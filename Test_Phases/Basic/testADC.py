@@ -25,9 +25,9 @@ for ch in range(8):
 #printing conversion results from the list of read messages
 print("Conversion results:")
 for ch in range(len(convres)):
-	if(ch!=2):
-		convres[ch]=convres[ch][0]*256+convres[ch][1]
-		convres[ch] = convres[ch]*2.5/4095
+	convres[ch]=convres[ch][0]*256+convres[ch][1]
+	convres[ch] = convres[ch]*2.5/4095
+	print("Ch {0}: {1}".format(ch,convres[ch]))
 	
 
 convres[0]= convres[0] * 2 #V5
