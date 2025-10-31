@@ -72,7 +72,7 @@ def adcThread(stopThreads):
 		#reconstructing measurements
 		
 		ADCdata[0]=ADCdata[0]*2 		#V5
-		ADCdata[1]=ADCdata[1]	#I5
+		ADCdata[1]=ADCdata[1]			#I5
 		
 		ADCdata[2]=ADCdata[2]*5.255319 	#VB battery voltage
 		ADCdata[3]=ADCdata[3]/0.30060	#IB battery current

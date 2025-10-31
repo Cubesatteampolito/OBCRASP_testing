@@ -45,16 +45,25 @@ import Threads.LogThread
 print(f"{WHITE}Starting threads")
 
 epsT=threading.Thread(target=Threads.EPSThread.adcThread,args=(stopThreads,), daemon=True)
-aocsT=threading.Thread(target=Threads.AOCSThread.aocsThread,args=(AOCStestStatus,), daemon=True)	
-logT=threading.Thread(target=Threads.LogThread.logThread,args = (LOGtestStatus,), daemon=True)
-cmsysT=threading.Thread(target=Threads.COMMSYSThread.commsysThread, args=(COMMSYStestStatus,),daemon=True)
+#aocsT=threading.Thread(target=Threads.AOCSThread.aocsThread,args=(AOCStestStatus,), daemon=True)	
+#logT=threading.Thread(target=Threads.LogThread.logThread,args = (LOGtestStatus,), daemon=True)
+#cmsysT=threading.Thread(target=Threads.COMMSYSThread.commsysThread, args=(COMMSYStestStatus,),daemon=True)
 
 epsT.start()
-aocsT.start()
-logT.start()
-cmsysT.start()
+# aocsT.start()
+# logT.start()
+# cmsysT.start()
 
 print("All threads started")
+
+
+
+#Waiting for threads to end
+
+#aocsT.join(timeout=threadTermTimeout)
+#logT.join(timeout=threadTermTimeout)
+#cmsysT.join(timeout=threadTermTimeout)
+epsT.join(timeout=threadTermTimeout)
 
 def stop_handler(sig, frame): #handler function for stop signals
 	#global stopThreads
@@ -78,13 +87,6 @@ def stop_handler(sig, frame): #handler function for stop signals
 #setting signal handler
 signal.signal(signal.SIGTERM, stop_handler)
 signal.signal(signal.SIGINT, stop_handler)
-
-#Waiting for threads to end
-epsT.join(timeout=threadTermTimeout)
-aocsT.join(timeout=threadTermTimeout)
-logT.join(timeout=threadTermTimeout)
-cmsysT.join(timeout=threadTermTimeout)
-
 print()
 print()
 #Check test result
