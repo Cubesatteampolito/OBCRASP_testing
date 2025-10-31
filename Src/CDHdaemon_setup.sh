@@ -2,8 +2,8 @@
 
 #CHECK IF SCRIPT IS RUN WITH SUDO
 if [ "$EUID" -eq 0 ]
-  then echo "Script should NOT be called as sudo"
-  exit
+  #then echo "Script should NOT be called as sudo"
+  #exit
 fi
 
 #enabling i2c device
