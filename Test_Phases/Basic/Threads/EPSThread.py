@@ -68,7 +68,7 @@ def adcThread(stopThreads):
 		ADCdata=readADC(False)
 		#measurements reconstruction
 		for ch in range(8):
-			print(ADCdata[ch])
+			print("RAW DATA {0} : {1}".format(ch,ADCdata[ch]))
 			print()
 			ADCdata[ch]=ADCdata[ch]*2.5/4096 #reconstructing measured voltage
 		
@@ -82,7 +82,7 @@ def adcThread(stopThreads):
 			
 		#writing data on telegraf/file
 		strFormat="housekeepingOBC,source={0} VB={1},IB={2},V5={3},I5RAW={4} {5}\n"
-		finalString=strFormat.format("OBC",ADCdata[2],ADCdata[3],ADCdata[0],ADCdata[1],time.time_ns())
+		finalString=strFormat.format("OBC",ADCdata[0],ADCdata[1],ADCdata[2],ADCdata[3],time.time_ns())
 		print(finalString,sep="")
 		#sending data to logThread
 		#logQueue.put(finalString)
