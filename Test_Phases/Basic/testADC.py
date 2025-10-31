@@ -31,10 +31,10 @@ for ch in range(len(convres)):
 
 convres[0]= convres[0] * 2 #V5
 print("V5 VALUE: {0}".format(convres[0]))
-convres[1]= convres[1] / 0.3 #I5
-print("I5 VALUE: {0}".format(convres[1]))
-convres[2] = convres[2]*5.255319    #VB
-print("VB VALUE: {0}".format(convres[2]))
+convres[1]= convres[1]*5.255319  #vb
+print("vb VALUE: {0}".format(convres[1]))
+convres[2] = convres[2]/0.30060    #
+print("unknown VALUE: {0}".format(convres[2]))
 convres[3] = convres[3]/0.30060  #IB
 print("IB VALUE: {0}".format(convres[3]))
 
