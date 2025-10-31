@@ -25,15 +25,15 @@ import Threads.LogThread
 
 #running all threads
 print("Starting threads")
-#adcT=threading.Thread(target=Threads.ADCThread.adcThread,args=(stopThreads,), daemon=True)
+adcT=threading.Thread(target=Threads.ADCThread.adcThread,args=(stopThreads,), daemon=True)
 cliT=threading.Thread(target=Threads.ClientThread.clientThread,args= (stopThreads,), daemon=True)	
-#cdhT=threading.Thread(target=Threads.CDHThread.cdhThread,args=(stopThreads,), daemon=True)	
-#logT=threading.Thread(target=Threads.LogThread.logThread,args = (stopThreads,), daemon=True)
+cdhT=threading.Thread(target=Threads.CDHThread.cdhThread,args=(stopThreads,), daemon=True)	
+logT=threading.Thread(target=Threads.LogThread.logThread,args = (stopThreads,), daemon=True)
 	
-#adcT.start()
+adcT.start()
 cliT.start()
-#cdhT.start()
-#logT.start()
+cdhT.start()
+logT.start()
 
 print("All threads started")
 
@@ -63,15 +63,14 @@ signal.signal(signal.SIGINT, stop_handler)
 while 1:
 	#checking if all threads are still alive
 	allAlive=True
-	#if #not adcT.is_alive():
-		#allAlive=False
+	if not adcT.is_alive():
+		allAlive=False
 	if not cliT.is_alive():
 		allAlive=False
-	#if not cdhT.is_alive():
-		#allAlive=False
-	#if not logT.is_alive():
-		#allAlive=False
-		
+	if not cdhT.is_alive():
+		allAlive=False
+	if not logT.is_alive():
+		allAlive=False
 	if not allAlive:
 		print("A thread unexpectedly closed, terminating execution")
 		os.kill(os.getpid(),signal.SIGTERM)

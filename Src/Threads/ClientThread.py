@@ -27,17 +27,10 @@ def clientThread(stopThreads):
 	print("Creating client socket")
 	try:
 		if os.path.exists(cdhSockPath):
-			print("provo a cambiare permessi")
-			os.chmod(cdhSockPath, stat.S_IWUSR | stat.S_IRUSR)
-			print("cambiati i permessi")
-
 			os.remove(cdhSockPath)
 	
-		print("QUA ARRIVO")
 		server=socket.socket(socket.AF_UNIX,socket.SOCK_DGRAM)
-		print("server creato")
 		server.bind(cdhSockPath)
-		print("server collegato")
 		server.setblocking(False)
 	except:
 		print("ERROR: Failed to create client socket {0}".format(cdhSockPath))
