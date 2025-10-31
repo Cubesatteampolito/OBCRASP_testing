@@ -58,8 +58,8 @@ def adcThread(stopThreads):
 	print("Setting up ADC")
 	setupADC()
 	while 1: #thread loop
-		#if stopThreads.is_set(): #need to close thread
-			#break
+		if stopThreads.is_set(): #need to close thread
+			break
 		#lightweight method to get periodic task without strict control on period overflow or system time changes
 		time.sleep(ADCperiod-time.time()%ADCperiod)		
 		#getting ADC data
@@ -72,12 +72,13 @@ def adcThread(stopThreads):
 		#reconstructing measurements
 		
 		ADCdata[0]=ADCdata[0]*2 		#V5
-		ADCdata[1]=ADCdata[1]/0.30060	#I5
+		ADCdata[1]=ADCdata[1]	#I5
+		
 		ADCdata[2]=ADCdata[2]*5.255319 	#VB battery voltage
 		ADCdata[3]=ADCdata[3]/0.30060	#IB battery current
 			
 		#writing data on telegraf/file
-		strFormat="housekeepingOBC,source={0} VB={1},IB={2},V5={3},I5={4} {5}\n"
+		strFormat="housekeepingOBC,source={0} VB={1},IB={2},V5={3},I5RAW={4} {5}\n"
 		finalString=strFormat.format("OBC",ADCdata[2],ADCdata[3],ADCdata[0],ADCdata[1],time.time_ns())
 		print(finalString,sep="")
 		#sending data to logThread

@@ -34,7 +34,7 @@ COMMSYStestStatus = True
 LOGtestStatus = True
 
 threadTermTimeout=3 #timeout for thread join() after termination
-
+stopThreads= threading.Event()
 sys.path.append("./Threads")
 import Threads.EPSThread
 import Threads.AOCSThread
@@ -44,7 +44,7 @@ import Threads.LogThread
 #running all threads
 print(f"{WHITE}Starting threads")
 
-epsT=threading.Thread(target=Threads.EPSThread.adcThread,args=(EPStestStatus,), daemon=True)
+epsT=threading.Thread(target=Threads.EPSThread.adcThread,args=(stopThreads,), daemon=True)
 aocsT=threading.Thread(target=Threads.AOCSThread.aocsThread,args=(AOCStestStatus,), daemon=True)	
 logT=threading.Thread(target=Threads.LogThread.logThread,args = (LOGtestStatus,), daemon=True)
 cmsysT=threading.Thread(target=Threads.COMMSYSThread.commsysThread, args=(COMMSYStestStatus,),daemon=True)
