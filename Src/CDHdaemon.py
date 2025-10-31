@@ -38,12 +38,6 @@ logT.start()
 print("All threads started")
 
 def stop_handler(sig, frame): #handler function for stop signals
-	global stopThreads
-	global adcT
-	global cliT
-	global cdhT
-	global logT
-	global threadTermTimeout
 
 	stopThreads.set() #stopping all threads
 	
