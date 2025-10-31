@@ -26,7 +26,7 @@ for ch in range(8):
 print("Conversion results:")
 for ch in range(len(convres)):
 	convres[ch]=convres[ch][0]*256+convres[ch][1]
-	convres[ch] = convres[ch]*2.5/4095
+	convres[ch] = convres[ch]*2.5/4096
 	print("Ch {0}: {1}".format(ch,convres[ch]))
 	
 
