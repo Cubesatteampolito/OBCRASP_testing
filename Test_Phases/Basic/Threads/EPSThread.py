@@ -71,10 +71,10 @@ def adcThread(stopThreads):
 			ADCdata[ch]=ADCdata[ch]*2.5/4095 #reconstructing measured voltage
 		#reconstructing measurements
 		
-		ADCdata[0]=ADCdata[0]*2 	#V5
-		ADCdata[1]=ADCdata[1]*3.326667 	#I5
-		ADCdata[2]=ADCdata[2]*5.255319 	#VB
-		ADCdata[3]=ADCdata[3]*3.326667 	#IB
+		ADCdata[0]=ADCdata[0]*2 		#V5
+		ADCdata[1]=ADCdata[1]*0.30060	#I5
+		ADCdata[2]=ADCdata[2]*5.255319 	#VB battery voltage
+		ADCdata[3]=ADCdata[3]*0.30060	#IB battery current
 			
 		#writing data on telegraf/file
 		strFormat="housekeepingOBC,source={0} VB={1},IB={2},V5={3},I5={4} {5}\n"
