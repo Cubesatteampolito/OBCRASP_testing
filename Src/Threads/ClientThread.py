@@ -20,8 +20,6 @@ uartRetries=2 #number of retries in case of failed ack (total 3 tries)
 
 def clientThread(stopThreads):
 	print("Client thread started")
-	
-		
 	server=None
 	#creating socket for client
 	print("Creating client socket")

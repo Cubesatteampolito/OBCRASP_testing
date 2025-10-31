@@ -14,11 +14,13 @@ sudo apt install python3-smbus2 &&
 
 #executing serial library makefile
 cd serial &&
+chmod +x serial_setup.sh &&
 ./serial_setup.sh &&
 cd .. &&
 
 #parsing messages
 cd messages &&
+chmod +x parseMessages.py &&
 ./parseMessages.py &&
 cd .. &&
 
