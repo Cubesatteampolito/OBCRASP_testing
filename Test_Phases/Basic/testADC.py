@@ -39,3 +39,13 @@ print("unknown VALUE: {0}".format(convres[2]))
 convres[3] = convres[3]/0.30060  #IB
 print("IB VALUE: {0}".format(convres[3]))
 
+'''
+ELEMENTO 0: CH0 --> V5
+ELEMENTO 1: CH2 --> VB
+ELEMENTO 2: CH4 --> T0 --> PC104 resistenza incorporata
+ELEMENTO 3: CH6 --> PC104
+ELEMENTO 4: CH1 --> I5
+ELEMENTO 5: CH3 --> IB
+ELEMENTO 6: CH5 --> PC104
+ELEMENTO 7: CH7 --> PC104
+'''
