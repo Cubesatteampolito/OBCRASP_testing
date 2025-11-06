@@ -1,6 +1,13 @@
 #!/bin/bash
 
+<<<<<<< HEAD
 
+=======
+#CHECK IF SCRIPT IS RUN WITH SUDO
+if [ "$EUID" -eq 0 ]
+  then echo "Script should NOT be called as sudo"
+fi
+>>>>>>> f3d773c686cd9305fc98aa0cd92c3c49d6c7329e
 
 #ADDING TELEGRAF REPOSITORY (from https://www.influxdata.com/downloads/)
 # influxdata-archive_compat.key GPG fingerprint:
