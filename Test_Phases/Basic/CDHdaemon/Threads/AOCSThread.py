@@ -15,23 +15,25 @@ availableCommands=[0,1] #command codes available from client
 clientQueueRxTimeout=0.02 #timeout for reaing from client rx queue
 #--------------------------------------
 
-def cdhThread(stopThreads):
-	print("CDH thread started")
-	
-	sys.path.append("./messages")
-	import messages as msg
-	serial = ctypes.CDLL("./serial/serialInterface.so")
-	print("Maximum serial payload length: {0}\n".format(serial.getMaxLen()))
-	
-	import LogThread
-	import ClientThread
-    
-	logQueue = LogThread.logQueue
-	clientQueueTx = ClientThread.clientQueueTx
-	clientQueueRx = ClientThread.clientQueueRx
-	uartTimeout = ClientThread.uartTimeout
-	uartRetries = ClientThread.uartRetries
 
+#set stdout in line buffering mode
+sys.stdout.reconfigure(line_buffering=True)
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+import messages as msg
+
+serial_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'serial', 'serialInterface.so'))
+serial = ctypes.CDLL(serial_path)
+print("Maximum serial payload length: {0}\n".format(serial.getMaxLen()))
+
+def cdhThread():
+	print("CDH thread started")
+	from ClientThread import uartTimeout, uartRetries,clientQueueTx, clientQueueRx
+	from LogThread import logQueue
+	sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+	from CDHdaemon import stopThreads
+
+	global clientQueueRxTimeout
 
 	#initializing serial line towards ADCS
 	print("Initializing UART")
@@ -121,6 +123,8 @@ def cdhThread(stopThreads):
 						print("WARNING: {0} message from ADCS not handled".format(msg.msgDict[code].__name__))
 			else:
 				print("WARNING: Received unknown message from ADCS (code {0} length {1})".format(code, l))
+				print("Packet {0} {1} {2}".format(code,msg.msgDict[code].__name__,msg.msgDict[code].__str__))
 	
 	print("Closing UART")	
 	serial.deinitUART()
+

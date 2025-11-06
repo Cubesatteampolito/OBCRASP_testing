@@ -1,4 +1,3 @@
-
 #!/bin/python3
 
 import smbus2
@@ -11,14 +10,17 @@ import ctypes
 import os
 import signal
 
+
+#set stdout in line buffering mode
+sys.stdout.reconfigure(line_buffering=True)
+
 #ADC thread ---------------------------
 address=0x48
 command=0x8C
 #creating SMBus instance on I2C bus 1
 bus=smbus2.SMBus(1)
-ADCperiod=1 #sampling period in seconds
+ADCperiod=5 #sampling period in seconds
 #--------------------------------------
-
 
 #setting up the ADC
 def setupADC(printerr=True):
@@ -47,13 +49,18 @@ def readADC(printerr=True):
 		
 	return convres
 	
-def adcThread(stopThreads):
+def adcThread():
+	print("ADC thread started")
+	from LogThread import logQueue
 	
-	import LogThread
+	global address
+	global command
+	global bus
+	global ADCperiod
 	
-	print("EPS thread started")
-	#logQueue =LogThread.logQueue
-	
+	sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+	from CDHdaemon import stopThreads
+
 	
 	print("Setting up ADC")
 	setupADC()
@@ -80,6 +87,6 @@ def adcThread(stopThreads):
 		#writing data on telegraf/file
 		strFormat="housekeepingOBC,source={0} VB={1},IB={2},V5={3},I5={4} {5}\n"
 		finalString=strFormat.format("OBC",vb,ib,v5,i5,time.time_ns())
-		print(finalString,sep="")
+		#print(finalString,sep="")
 		#sending data to logThread
-		#logQueue.put(finalString)
+		logQueue.put(finalString)

@@ -9,7 +9,6 @@ import socket
 import ctypes
 import os
 import signal
-import stat
 
 #Client thread ------------------------
 cdhSockPath="/tmp/CDH.sock"
@@ -20,8 +19,20 @@ uartTimeout=0.100 # timeout for uart transmission with ack
 uartRetries=2 #number of retries in case of failed ack (total 3 tries)
 #--------------------------------------
 
-def clientThread(stopThreads):
+
+#set stdout in line buffering mode
+sys.stdout.reconfigure(line_buffering=True)
+
+def clientThread():
 	print("Client thread started")
+	
+	global cdhSockPath
+	global clientQueueTx
+	global clientQueueRx
+	sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+	from CDHdaemon import stopThreads
+	global clientQueueTxTimeout
+	
 	server=None
 	#creating socket for client
 	print("Creating client socket")
@@ -81,4 +92,3 @@ def clientThread(stopThreads):
 		os.remove(cdhSockPath)
 	except:
 		pass	
-		

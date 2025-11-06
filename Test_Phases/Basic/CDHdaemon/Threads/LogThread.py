@@ -15,7 +15,7 @@ telegrafSockPath="/tmp/telegraf.sock" #telegraf socket path
 logQueue=queue.Queue() #queue to send strings for telegraf/log file
 logQueueTimeout=0.05 #timeout for log queue read (to reduce CPU starving)
 telegrafRetryTime=3 #time waited after telegraf connection failure before retrying
-enableFileLog=True #file logging enabled/disabled
+enableFileLog=False #file logging enabled/disabled
 logFilePath="telegrafLog.txt" #log file path
 fileBuffering=512 #file buffer size (see python file buffering modes for details)
 		#file buffer has been set to a big value because a lot of I/O from 
@@ -24,9 +24,23 @@ fileBuffering=512 #file buffer size (see python file buffering modes for details
 fileRetryTime=3 #time waited after log file opening failure before retrying
 #--------------------------------------
 
-def logThread(stopThreads):
-	
+#set stdout in line buffering mode
+sys.stdout.reconfigure(line_buffering=True)
+
+def logThread():
 	print("Log thread started")
+	
+	global telegrafSockPath
+	global logQueue
+	global logQueueTimeout
+	global telegrafRetryTime
+	global logFilePath
+	global enableFileLog
+	global fileBuffering
+	global fileRetryTime
+
+	sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+	from CDHdaemon import stopThreads
 	
 	telegrafTryTime=0
 	socketState=0
@@ -68,7 +82,6 @@ def logThread(stopThreads):
 		#checking if there's some data to be logged
 		try:
 			log=logQueue.get(timeout=logQueueTimeout)
-			print(log)
 		except:
 			pass
 		else:
@@ -97,4 +110,3 @@ def logThread(stopThreads):
 	if enableFileLog:
 		print("Closing log file")
 		logFile.close()
-		

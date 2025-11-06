@@ -1,10 +1,6 @@
 #!/bin/bash
 
-#CHECK IF SCRIPT IS RUN WITH SUDO
-if [ "$EUID" -eq 0 ]
-  then echo "Script should NOT be called as sudo"
-  exit
-fi
+
 
 #enabling i2c device
 sudo raspi-config nonint do_i2c 0 &&
@@ -14,11 +10,13 @@ sudo apt install python3-smbus2 &&
 
 #executing serial library makefile
 cd serial &&
+chmod +x serial_setup.sh &&
 ./serial_setup.sh &&
 cd .. &&
 
 #parsing messages
 cd messages &&
+chmod +x parseMessages.py &&
 ./parseMessages.py &&
 cd .. &&
 

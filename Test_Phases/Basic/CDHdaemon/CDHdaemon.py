@@ -13,22 +13,21 @@ import signal
 #set stdout in line buffering mode
 sys.stdout.reconfigure(line_buffering=True)
 
-
 stopThreads=threading.Event() #thread safe flag to signal to all threads to stop
 threadTermTimeout=3 #timeout for thread join() after termination
 
-sys.path.append("./Threads")
-import Threads.ADCThread
-import Threads.CDHThread
-import Threads.ClientThread
-import Threads.LogThread
+from Threads.ADCThread import adcThread
+from Threads.AOCSThread import cdhThread
+from Threads.ClientThread import clientThread
+from Threads.LogThread import logThread
+#!!!!!!!don't forget COMMSYS thread!!!!!!!!!!
 
 #running all threads
 print("Starting threads")
-adcT=threading.Thread(target=Threads.ADCThread.adcThread,args=(stopThreads,), daemon=True)
-cliT=threading.Thread(target=Threads.ClientThread.clientThread,args= (stopThreads,), daemon=True)	
-cdhT=threading.Thread(target=Threads.CDHThread.cdhThread,args=(stopThreads,), daemon=True)	
-logT=threading.Thread(target=Threads.LogThread.logThread,args = (stopThreads,), daemon=True)
+adcT=threading.Thread(target=adcThread, daemon=True)
+cliT=threading.Thread(target=clientThread, daemon=True)	
+cdhT=threading.Thread(target=cdhThread, daemon=True)	
+logT=threading.Thread(target=logThread, daemon=True)
 	
 adcT.start()
 cliT.start()
@@ -39,9 +38,10 @@ print("All threads started")
 
 def stop_handler(sig, frame): #handler function for stop signals
 	global stopThreads
-	
+	global adcT
 	global cliT
-	
+	global cdhT
+	global logT
 	global threadTermTimeout
 
 	stopThreads.set() #stopping all threads
@@ -49,9 +49,10 @@ def stop_handler(sig, frame): #handler function for stop signals
 	print("Received termination signal")
 	
 	#waiting for all threads to join
-	
+	adcT.join(timeout=threadTermTimeout)
 	cliT.join(timeout=threadTermTimeout)
-	
+	cdhT.join(timeout=threadTermTimeout)
+	logT.join(timeout=threadTermTimeout)
 	
 	print("All threads terminated or timed out, BYE!")
 	sys.exit()
@@ -71,6 +72,7 @@ while 1:
 		allAlive=False
 	if not logT.is_alive():
 		allAlive=False
+		
 	if not allAlive:
 		print("A thread unexpectedly closed, terminating execution")
 		os.kill(os.getpid(),signal.SIGTERM)
