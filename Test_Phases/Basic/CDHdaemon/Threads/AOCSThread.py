@@ -28,8 +28,8 @@ print("Maximum serial payload length: {0}\n".format(serial.getMaxLen()))
 
 def cdhThread():
 	print("CDH thread started")
-	from ClientThread import uartTimeout, uartRetries,clientQueueTx, clientQueueRx
-	from LogThread import logQueue
+	from Threads.ClientThread import uartTimeout, uartRetries,clientQueueTx, clientQueueRx
+	from Threads.LogThread import logQueue
 	sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 	from CDHdaemon import stopThreads
 

@@ -51,7 +51,7 @@ def readADC(printerr=True):
 	
 def adcThread():
 	print("ADC thread started")
-	from LogThread import logQueue
+	from Threads.LogThread import logQueue
 	
 	global address
 	global command
