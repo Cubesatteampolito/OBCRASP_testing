@@ -1,10 +1,6 @@
 #!/bin/bash
 
-#CHECK IF SCRIPT IS RUN WITH SUDO
-if [ "$EUID" -eq 0 ]
-  then echo "Script should NOT be called as sudo"
-  exit
-fi
+
 
 #enabling i2c device
 sudo raspi-config nonint do_i2c 0 &&
