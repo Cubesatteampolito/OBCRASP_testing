@@ -26,12 +26,11 @@ serial_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'ser
 serial = ctypes.CDLL(serial_path)
 print("Maximum serial payload length: {0}\n".format(serial.getMaxLen()))
 
-def cdhThread():
+def cdhThread(stopThreads):
 	print("CDH thread started")
 	from Threads.ClientThread import uartTimeout, uartRetries,clientQueueTx, clientQueueRx
 	from Threads.LogThread import logQueue
-	sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-	from CDHdaemon import stopThreads
+	
 
 	global clientQueueRxTimeout
 

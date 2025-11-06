@@ -24,10 +24,10 @@ from Threads.LogThread import logThread
 
 #running all threads
 print("Starting threads")
-adcT=threading.Thread(target=adcThread, daemon=True)
-cliT=threading.Thread(target=clientThread, daemon=True)	
-cdhT=threading.Thread(target=cdhThread, daemon=True)	
-logT=threading.Thread(target=logThread, daemon=True)
+adcT=threading.Thread(target=adcThread,args=(stopThreads,), daemon=True)
+cliT=threading.Thread(target=clientThread,args=(stopThreads,), daemon=True)	
+cdhT=threading.Thread(target=cdhThread, args=(stopThreads,),daemon=True)	
+logT=threading.Thread(target=logThread,args=(stopThreads,), daemon=True)
 	
 adcT.start()
 cliT.start()

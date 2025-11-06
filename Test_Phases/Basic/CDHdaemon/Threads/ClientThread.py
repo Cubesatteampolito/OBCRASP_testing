@@ -23,14 +23,12 @@ uartRetries=2 #number of retries in case of failed ack (total 3 tries)
 #set stdout in line buffering mode
 sys.stdout.reconfigure(line_buffering=True)
 
-def clientThread():
+def clientThread(stopThreads):
 	print("Client thread started")
 	
 	global cdhSockPath
 	global clientQueueTx
 	global clientQueueRx
-	sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-	from CDHdaemon import stopThreads
 	global clientQueueTxTimeout
 	
 	server=None

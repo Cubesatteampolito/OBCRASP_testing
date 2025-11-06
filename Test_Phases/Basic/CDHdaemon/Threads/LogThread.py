@@ -27,7 +27,7 @@ fileRetryTime=3 #time waited after log file opening failure before retrying
 #set stdout in line buffering mode
 sys.stdout.reconfigure(line_buffering=True)
 
-def logThread():
+def logThread(stopThreads):
 	print("Log thread started")
 	
 	global telegrafSockPath
@@ -39,8 +39,6 @@ def logThread():
 	global fileBuffering
 	global fileRetryTime
 
-	sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-	from CDHdaemon import stopThreads
 	
 	telegrafTryTime=0
 	socketState=0

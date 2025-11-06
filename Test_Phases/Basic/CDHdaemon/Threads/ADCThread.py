@@ -49,7 +49,7 @@ def readADC(printerr=True):
 		
 	return convres
 	
-def adcThread():
+def adcThread(stopThreads):
 	print("ADC thread started")
 	from Threads.LogThread import logQueue
 	
@@ -57,10 +57,6 @@ def adcThread():
 	global command
 	global bus
 	global ADCperiod
-	
-	sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-	from CDHdaemon import stopThreads
-
 	
 	print("Setting up ADC")
 	setupADC()
