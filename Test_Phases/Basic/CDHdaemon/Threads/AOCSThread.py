@@ -115,7 +115,7 @@ def cdhThread(stopThreads):
 						
 						#appending timestamp
 						influxstr+=" {0}\n".format(currt)
-						
+						print("PACKET ARRIVED: "+influxstr)
 						#sending to telegraf queue
 						logQueue.put(influxstr)
 						
