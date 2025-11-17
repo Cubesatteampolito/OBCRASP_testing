@@ -5,6 +5,7 @@ import time
 import sys
 import ctypes
 import os
+import importlib.util
 
 
 #CDH thread ---------------------------
@@ -16,9 +17,14 @@ clientQueueRxTimeout=0.02 #timeout for reaing from client rx queue
 #set stdout in line buffering mode
 sys.stdout.reconfigure(line_buffering=True)
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..','messages.py')))
-import messages as msg
-print(msg.__file__)
+messages_path = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), "..", "messages", "messages.py")
+)
+
+# ----example
+spec = importlib.util.spec_from_file_location("messages", messages_path)
+msg = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(msg)
 
 serial_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'serial', 'serialInterface.so'))
 serial = ctypes.CDLL(serial_path)
@@ -29,8 +35,6 @@ def cdhThread(stopThreads):
 	from Threads.ClientThread import uartTimeout, uartRetries,clientQueueTx, clientQueueRx
 	from Threads.LogThread import logQueue
 	global clientQueueRxTimeout
-	print("QUESTO FILE ---------------")
-	print(msg.__file__)
 	#initializing serial line towards ADCS
 	print("Initializing UART")
 	serial.initUART(ctypes.c_float(uartTimeout),ctypes.c_uint8(uartRetries))
