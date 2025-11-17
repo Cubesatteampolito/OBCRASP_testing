@@ -18,6 +18,7 @@ sys.stdout.reconfigure(line_buffering=True)
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import messages as msg
+print(msg.__file__)
 
 serial_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'serial', 'serialInterface.so'))
 serial = ctypes.CDLL(serial_path)
