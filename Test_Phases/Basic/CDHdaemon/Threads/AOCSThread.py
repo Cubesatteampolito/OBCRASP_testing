@@ -29,7 +29,8 @@ def cdhThread(stopThreads):
 	from Threads.ClientThread import uartTimeout, uartRetries,clientQueueTx, clientQueueRx
 	from Threads.LogThread import logQueue
 	global clientQueueRxTimeout
-
+	print("QUESTO FILE ---------------")
+	print(msg.__file__)
 	#initializing serial line towards ADCS
 	print("Initializing UART")
 	serial.initUART(ctypes.c_float(uartTimeout),ctypes.c_uint8(uartRetries))
