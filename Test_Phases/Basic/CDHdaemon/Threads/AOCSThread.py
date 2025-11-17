@@ -16,7 +16,7 @@ clientQueueRxTimeout=0.02 #timeout for reaing from client rx queue
 #set stdout in line buffering mode
 sys.stdout.reconfigure(line_buffering=True)
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..','messages.py')))
 import messages as msg
 print(msg.__file__)
 
@@ -28,8 +28,6 @@ def cdhThread(stopThreads):
 	print("CDH thread started")
 	from Threads.ClientThread import uartTimeout, uartRetries,clientQueueTx, clientQueueRx
 	from Threads.LogThread import logQueue
-	print("IL FILE IN QUESTIUONE: ")
-	print(msg.__file__)
 	global clientQueueRxTimeout
 
 	#initializing serial line towards ADCS
