@@ -1,14 +1,11 @@
 #!/bin/python3
 
-import smbus2
+
 import time
-import threading
-import queue
 import sys
-import socket
 import ctypes
 import os
-import signal
+
 
 #CDH thread ---------------------------
 availableCommands=[0,1] #command codes available from client
@@ -85,7 +82,7 @@ def cdhThread(stopThreads):
 			#check message code
 			code=buffrx[0]
 			#if the code and the length correspond to a valid message
-			if code in msg.msgDict.keys() and ctypes.sizeof(msg.msgDict[code]) == l:
+			if code in msg.msgDict.keys(): #and ctypes.sizeof(msg.msgDict[code]) == l:
 				# ------ HERE WE HANDLE EACH MESSAGE CODE FROM ADCS -------			
 				match msg.msgDict[code].__name__:
 					case "attitudeADCS" | "housekeepingADCS" | "opmodeADCS": #attitude telemetry message

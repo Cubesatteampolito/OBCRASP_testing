@@ -1,12 +1,8 @@
 #!/bin/python3
 
-import smbus2
 import time
 import threading
-import queue
 import sys
-import socket
-import ctypes
 import os
 import signal
 
@@ -20,6 +16,7 @@ from Threads.ADCThread import adcThread
 from Threads.AOCSThread import cdhThread
 from Threads.ClientThread import clientThread
 from Threads.LogThread import logThread
+
 #!!!!!!!don't forget COMMSYS thread!!!!!!!!!!
 
 #running all threads
