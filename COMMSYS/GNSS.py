@@ -11,7 +11,7 @@ This does NOT configure the receiver yet, it just proves that:
 
 import time
 from smbus2 import SMBus
-import spidevgit 
+import spidev
 import sys
 
 # ---------- I2C / MCP23017 ----------
