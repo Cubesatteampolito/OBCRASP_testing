@@ -5,7 +5,7 @@ import time
 import sys
 
 # --- SPI and GPIO Setup ---
-SPI_BUS = 0
+SPI_BUS = 1
 SPI_DEVICE = 0
 GPIO_RESET = 17    # GPIO pin for Reset
 GPIO_CS = 18        # GPIO pin for Chip Select (connected to NSS)
