@@ -139,8 +139,8 @@ def adcThread():
 		#reconstructing measurements
 		
 		v5=ADCdata[0]*2 		#V5
-		vb=ADCdata[1]*5.255319	#VB
-		i5=ADCdata[4]*5.255319 	#I5 
+		vb=ADCdata[1]*6.72 		#VB  5.255319 if Vmax is 12.4
+		i5=ADCdata[4]*6.72 		#I5 5.255319 if Vmax is 12.4
 		ib=ADCdata[5]/0.30060	#IB 
 			
 		#writing data on telegraf/file
@@ -149,6 +149,9 @@ def adcThread():
 		#print(finalString,sep="")
 		#sending data to logThread
 		logQueue.put(finalString)
+
+
+
 
 def clientThread():
 	print("Client thread started")
