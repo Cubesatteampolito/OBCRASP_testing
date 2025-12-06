@@ -120,7 +120,7 @@ def adcThread():
 	global bus
 	global ADCperiod
 	global stopThreads
-	
+	 
 	print("Setting up ADC")
 	setupADC()
 	while 1: #thread loop
