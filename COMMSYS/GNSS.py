@@ -2,6 +2,7 @@
 
 import time
 from datetime import datetime
+from pathlib import Path  # <-- added
 
 import spidev  # install with: sudo apt-get install python3-spidev  (or pip3 install spidev)
 
@@ -226,111 +227,135 @@ def main():
 
     last_print = 0.0
 
+    # --- logging setup: two files in same folder as this script (overwrite each run) ---
+    script_dir = Path(__file__).resolve().parent
+    raw_log_path = script_dir / "gnss_raw.log"
+    parsed_log_path = script_dir / "gnss_output.log"
+
     try:
-        for sentence in read_nmea_sentences(spi):
-            if len(sentence) < 6:
-                continue
+        with raw_log_path.open("w", encoding="utf-8") as raw_log, \
+             parsed_log_path.open("w", encoding="utf-8") as parsed_log:
 
-            msg_type = sentence[3:6]  # 'RMC', 'GGA', ...
+            try:
+                for sentence in read_nmea_sentences(spi):
+                    # Log raw NMEA with timestamp
+                    ts_raw = datetime.utcnow().isoformat()
+                    raw_log.write(f"{ts_raw} {sentence}\n")
 
-            if msg_type == "RMC":
-                rmc = parse_rmc(sentence)
-                if rmc:
-                    if rmc["utc"]:
-                        fix_state["utc"] = rmc["utc"]
-                    if rmc["lat"] is not None:
-                        fix_state["lat"] = rmc["lat"]
-                    if rmc["lon"] is not None:
-                        fix_state["lon"] = rmc["lon"]
-                    fix_state["speed_knots"] = rmc["speed_knots"]
-                    fix_state["course_deg"] = rmc["course_deg"]
-                    # 'A' = valid, 'V' = void
-                    fix_state["fix_ok"] = rmc["status"] == "A"
+                    if len(sentence) < 6:
+                        continue
 
-            elif msg_type == "GGA":
-                gga = parse_gga(sentence)
-                if gga:
-                    if gga["lat"] is not None:
-                        fix_state["lat"] = gga["lat"]
-                    if gga["lon"] is not None:
-                        fix_state["lon"] = gga["lon"]
-                    fix_state["alt_m"] = gga["alt_m"]
-                    fix_state["num_sats"] = gga["num_sats"]
-                    fix_state["hdop"] = gga["hdop"]
-                    if gga["fix_quality"] == 0:
-                        fix_state["fix_ok"] = False
+                    msg_type = sentence[3:6]  # 'RMC', 'GGA', ...
 
-            # print at ~1 Hz
-            now = time.time()
-            if now - last_print >= 1.0:
-                last_print = now
+                    if msg_type == "RMC":
+                        rmc = parse_rmc(sentence)
+                        if rmc:
+                            if rmc["utc"]:
+                                fix_state["utc"] = rmc["utc"]
+                            if rmc["lat"] is not None:
+                                fix_state["lat"] = rmc["lat"]
+                            if rmc["lon"] is not None:
+                                fix_state["lon"] = rmc["lon"]
+                            fix_state["speed_knots"] = rmc["speed_knots"]
+                            fix_state["course_deg"] = rmc["course_deg"]
+                            # 'A' = valid, 'V' = void
+                            fix_state["fix_ok"] = rmc["status"] == "A"
 
-                utc_str = (
-                    fix_state["utc"].isoformat()
-                    if isinstance(fix_state["utc"], datetime)
-                    else "unknown"
-                )
-                lat = fix_state["lat"]
-                lon = fix_state["lon"]
-                lat_str = f"{lat:.6f}" if isinstance(lat, (int, float)) else "NA"
-                lon_str = f"{lon:.6f}" if isinstance(lon, (int, float)) else "NA"
+                    elif msg_type == "GGA":
+                        gga = parse_gga(sentence)
+                        if gga:
+                            if gga["lat"] is not None:
+                                fix_state["lat"] = gga["lat"]
+                            if gga["lon"] is not None:
+                                fix_state["lon"] = gga["lon"]
+                            fix_state["alt_m"] = gga["alt_m"]
+                            fix_state["num_sats"] = gga["num_sats"]
+                            fix_state["hdop"] = gga["hdop"]
+                            if gga["fix_quality"] == 0:
+                                fix_state["fix_ok"] = False
 
-                sats_str = (
-                    str(fix_state["num_sats"])
-                    if isinstance(fix_state["num_sats"], int)
-                    else "NA"
-                )
-                hdop_str = (
-                    f"{fix_state['hdop']:.1f}"
-                    if isinstance(fix_state["hdop"], (int, float))
-                    else "NA"
-                )
-                alt_str = (
-                    f"{fix_state['alt_m']:.1f}"
-                    if isinstance(fix_state["alt_m"], (int, float))
-                    else "NA"
-                )
+                    # print at ~1 Hz
+                    now = time.time()
+                    if now - last_print >= 1.0:
+                        last_print = now
 
-                if fix_state["fix_ok"]:
-                    speed_kn = fix_state["speed_knots"]
-                    speed_mps = (
-                        speed_kn * 0.514444
-                        if isinstance(speed_kn, (int, float))
-                        else None
-                    )
-                    speed_kn_str = (
-                        f"{speed_kn:.2f}"
-                        if isinstance(speed_kn, (int, float))
-                        else "NA"
-                    )
-                    speed_mps_str = (
-                        f"{speed_mps:.2f}"
-                        if isinstance(speed_mps, (int, float))
-                        else "NA"
-                    )
-                    course = fix_state["course_deg"]
-                    course_str = (
-                        f"{course:.1f}"
-                        if isinstance(course, (int, float))
-                        else "NA"
-                    )
+                        utc_str = (
+                            fix_state["utc"].isoformat()
+                            if isinstance(fix_state["utc"], datetime)
+                            else "unknown"
+                        )
+                        lat = fix_state["lat"]
+                        lon = fix_state["lon"]
+                        lat_str = f"{lat:.6f}" if isinstance(lat, (int, float)) else "NA"
+                        lon_str = f"{lon:.6f}" if isinstance(lon, (int, float)) else "NA"
 
-                    print(
-                        f"[FIX] UTC={utc_str} "
-                        f"lat={lat_str} lon={lon_str} "
-                        f"alt={alt_str} m sats={sats_str} HDOP={hdop_str} "
-                        f"v={speed_mps_str} m/s ({speed_kn_str} kn) "
-                        f"course={course_str} deg"
-                    )
-                else:
-                    print(
-                        f"[NO FIX] UTC={utc_str} "
-                        f"lat={lat_str} lon={lon_str} "
-                        f"sats={sats_str} HDOP={hdop_str}"
-                    )
+                        sats_str = (
+                            str(fix_state["num_sats"])
+                            if isinstance(fix_state["num_sats"], int)
+                            else "NA"
+                        )
+                        hdop_str = (
+                            f"{fix_state['hdop']:.1f}"
+                            if isinstance(fix_state["hdop"], (int, float))
+                            else "NA"
+                        )
+                        alt_str = (
+                            f"{fix_state['alt_m']:.1f}"
+                            if isinstance(fix_state["alt_m"], (int, float))
+                            else "NA"
+                        )
 
-    except KeyboardInterrupt:
-        print("\nStopping GNSS reader.")
+                        if fix_state["fix_ok"]:
+                            speed_kn = fix_state["speed_knots"]
+                            speed_mps = (
+                                speed_kn * 0.514444
+                                if isinstance(speed_kn, (int, float))
+                                else None
+                            )
+                            speed_kn_str = (
+                                f"{speed_kn:.2f}"
+                                if isinstance(speed_kn, (int, float))
+                                else "NA"
+                            )
+                            speed_mps_str = (
+                                f"{speed_mps:.2f}"
+                                if isinstance(speed_mps, (int, float))
+                                else "NA"
+                            )
+                            course = fix_state["course_deg"]
+                            course_str = (
+                                f"{course:.1f}"
+                                if isinstance(course, (int, float))
+                                else "NA"
+                            )
+
+                            message = (
+                                f"[FIX] UTC={utc_str} "
+                                f"lat={lat_str} lon={lon_str} "
+                                f"alt={alt_str} m sats={sats_str} HDOP={hdop_str} "
+                                f"v={speed_mps_str} m/s ({speed_kn_str} kn) "
+                                f"course={course_str} deg"
+                            )
+                        else:
+                            message = (
+                                f"[NO FIX] UTC={utc_str} "
+                                f"lat={lat_str} lon={lon_str} "
+                                f"sats={sats_str} HDOP={hdop_str}"
+                            )
+
+                        # Console output
+                        print(message)
+
+                        # Log parsed/output line with timestamp
+                        ts_out = datetime.utcnow().isoformat()
+                        parsed_log.write(f"{ts_out} {message}\n")
+
+                        # Make sure data hits disk regularly
+                        raw_log.flush()
+                        parsed_log.flush()
+
+            except KeyboardInterrupt:
+                print("\nStopping GNSS reader.")
 
     finally:
         try:
